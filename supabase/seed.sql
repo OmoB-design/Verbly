@@ -1,0 +1,17 @@
+-- ============================================================================
+-- Verbly — seed data
+-- ============================================================================
+-- INTENTIONALLY EMPTY of clinical content.
+--
+-- The 12-phase curriculum, age bands, and Compass item bank are versioned
+-- clinical content that goes through the review process in CONTRIBUTING.md
+-- before being seeded — they are NOT authored ad hoc here, and an AI assistant
+-- must not invent or paraphrase them (CLAUDE.md → "Content vs. code boundary").
+--
+-- When content is ready for seeding, it will be inserted here (or via a
+-- dedicated seed script) using the service-role connection, with a
+-- corresponding content_version and changelog entry.
+--
+-- Any local/dev test accounts should be created through the normal Supabase
+-- Auth signup flow so the handle_new_user() trigger provisions their profile
+-- rows correctly — not inserted directly into public.caregivers here.

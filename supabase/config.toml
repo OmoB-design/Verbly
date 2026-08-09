@@ -1,0 +1,31 @@
+# Supabase local dev config. `supabase start` reads this.
+# Only the settings relevant to this scaffold are set explicitly.
+
+project_id = "verbly"
+
+[api]
+enabled = true
+port = 54321
+# PostgREST-exposed schemas. `curriculum_content` is a non-public schema and
+# MUST be listed here (and in the hosted project's API settings) or its tables
+# are unreachable over the REST API. `public` is exposed by default.
+schemas = ["public", "curriculum_content"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/confirm"]
+
+[auth.email]
+# For local dev convenience. In hosted/staging, keep email confirmation ON.
+enable_confirmations = false
+
+[studio]
+enabled = true
+port = 54323
