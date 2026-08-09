@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ type ResultProps = {
   onOverridden?: () => void;
 };
 
-export function CompassResults({ result, assessmentId, childName, onOverridden }: ResultProps) {
+export function CompassResults({ result, assessmentId, childId, childName, onOverridden }: ResultProps) {
   // Locally track the overridable placement so the screen updates immediately.
   const [startingPhase, setStartingPhase] = React.useState(result.starting_phase);
   const [placementSource, setPlacementSource] = React.useState(result.placement_source);
@@ -109,6 +110,14 @@ export function CompassResults({ result, assessmentId, childName, onOverridden }
           </CardContent>
         </Card>
       ) : null}
+
+      {/* Forward movement: straight into practice from here — the caregiver
+          should never have to navigate backwards to move on (owner feedback). */}
+      <div>
+        <Button asChild size="lg">
+          <Link href={`/children/${childId}/practice`}>Start Phase {startingPhase} practice →</Link>
+        </Button>
+      </div>
 
       {/* Red-flag / referral — visually SEPARATED, framed as care, not a grade (§11). */}
       {hasReferral ? (

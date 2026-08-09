@@ -140,7 +140,7 @@ export const PHASE_11: PhaseSeed = {
           {
             title: "Model comments",
             instruction:
-              "Throughout the meal: comment on the food yourself — 'Mmm, it is warm!' / 'I see chicken!' — modelling commenting during natural routines as established in PECS Phase 6.",
+              "Throughout the meal: comment on the food yourself — 'Mmm, it is warm!' / 'I see chicken!' — modelling commenting during natural routines.",
           },
           {
             title: "Every meal, every day",
@@ -225,7 +225,7 @@ export const PHASE_11: PhaseSeed = {
           {
             title: "Free play first",
             instruction:
-              "Allow the child to play freely for the first 3–4 minutes. Join in naturally — follow the child's lead using the parallel play imitation from Phase 1 of this programme.",
+              "Allow the child to play freely for the first 3–4 minutes. Join in naturally — follow the child's lead, imitating their play exactly (same toy, same pace).",
           },
           {
             title: "First sabotage",

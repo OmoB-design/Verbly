@@ -78,5 +78,5 @@ export const INTRO_COPY = {
   lede:
     "A few questions about how your child communicates day to day. There are no right or wrong answers — just tell us what you usually see. It takes about ten minutes.",
   reassurance:
-    "This is a starting point to personalize activities, not a test or a diagnosis. It isn't a substitute for a professional evaluation.",
+    "Disclaimer: This is a starting point to personalize activities, not a test or a diagnosis. It isn't a substitute for a professional evaluation.",
 };

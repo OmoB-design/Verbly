@@ -226,7 +226,7 @@ export const PHASE_06: PhaseSeed = {
         script_version: 1,
         title: "Expanding the Array to 3–5 Cards",
         overview:
-          "Progressively expand the picture array from 2 to 3, then 4, then 5 cards within the session — building the child's discrimination capacity toward a functional, multi-symbol communication board and preparing directly for Phase 4 sentence structure.",
+          "Progressively expand the picture array from 2 to 3, then 4, then 5 cards within the session — building the child's discrimination capacity toward a functional, multi-symbol communication board and preparing directly for the sentence-strip work in the next phase.",
         materials: [
           "3–5 picture cards: start with 3 on the binder; a mix of preferred and mildly preferred items with all corresponding items available",
           "Clear organisation: consistent spacing, no overlapping — the child must be able to scan the array comfortably",

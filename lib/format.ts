@@ -53,3 +53,15 @@ export function formatDate(iso: string | null): string {
     day: "numeric",
   });
 }
+
+/** "4 years" / "4 years 3 months" / "18 months" — for display beside the DOB. */
+export function formatAge(dob: string, now: Date = new Date()): string {
+  const d = new Date(dob);
+  let months = (now.getUTCFullYear() - d.getUTCFullYear()) * 12 + (now.getUTCMonth() - d.getUTCMonth());
+  if (now.getUTCDate() < d.getUTCDate()) months -= 1;
+  if (months < 0) return "—";
+  if (months < 24) return `${months} month${months === 1 ? "" : "s"}`;
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  return rem === 0 ? `${years} years` : `${years} years ${rem} month${rem === 1 ? "" : "s"}`;
+}

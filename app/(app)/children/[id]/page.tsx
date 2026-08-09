@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, outcomeLabel, triggerReasonLabel } from "@/lib/format";
+import { formatAge, formatDate, outcomeLabel, triggerReasonLabel } from "@/lib/format";
 
 export default async function ChildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -97,7 +97,9 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           )}
         </div>
         {child.dob ? (
-          <p className="mt-1 text-sm text-muted-foreground">Born {formatDate(child.dob)}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Age: {formatAge(child.dob)} · Born {formatDate(child.dob)}
+          </p>
         ) : null}
       </div>
 

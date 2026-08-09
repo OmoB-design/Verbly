@@ -116,7 +116,7 @@ export const PHASE_07: PhaseSeed = {
         script_version: 1,
         title: "Introducing the Sentence Strip and 'I Want'",
         overview:
-          "Introduce the physical sentence strip and the 'I want' symbol card. Teach the child to place the 'I want' card in the first slot on the strip, then add the item card, then hand the complete strip to the communication partner — using the same high-preference items and low-prompt approach established across Phases 1–3.",
+          "Introduce the physical sentence strip and the 'I want' symbol card. Teach the child to place the 'I want' card in the first slot on the strip, then add the item card, then hand the complete strip to the communication partner — using the child's high-preference items and the least prompting needed.",
         materials: [
           "A velcro sentence strip — a long card with two velcro slots side by side. Pre-attach the 'I want' symbol card to the first slot; leave the second slot open for the item card",
           "2–3 of the child's highest-preference item cards on the binder alongside the sentence strip",

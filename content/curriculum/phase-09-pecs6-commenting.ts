@@ -112,7 +112,7 @@ export const PHASE_09: PhaseSeed = {
         script_version: 1,
         title: "Introducing Comment Stems: 'I See' and 'I Hear'",
         overview:
-          "Introduce the concept of commenting by teaching two new sentence strip starters — 'I see' and 'I hear' — and making a clear, explicit distinction between these commenting stems and the 'I want' requesting stem from Phase 4. This distinction between requesting and commenting is the core clinical goal of Phase 6.",
+          "Introduce the concept of commenting by teaching two new sentence strip starters — 'I see' and 'I hear' — and making a clear, explicit distinction between these commenting stems and the 'I want' requesting stem. This distinction between requesting and commenting is the core clinical goal of this phase.",
         materials: [
           "Two new sentence strips: one with 'I see' in the first slot, one with 'I hear' — placed alongside the 'I want' strip so all three are visible",
           "3–4 interesting objects or events the child notices or reacts to but does not necessarily want: a spinning top, a musical toy, a blinking light, a funny sound, a pet walking past",

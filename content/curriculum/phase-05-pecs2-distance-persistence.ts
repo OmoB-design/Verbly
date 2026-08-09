@@ -100,7 +100,7 @@ export const PHASE_05: PhaseSeed = {
         overview:
           "Build the child's understanding that communication requires moving toward a listener. The child must now stand up and walk to reach Caregiver A in order to complete the exchange — the first step in making PECS a truly functional, portable communication system.",
         materials: [
-          "The same 3–5 high-preference items from PECS Phase 1 — the child must still strongly desire these items",
+          "3–5 of the child's highest-preference items — the child must strongly desire these items right now",
           "The portable PECS binder, with the target item's picture card attached to the front page with Velcro, within arm's reach of the child",
           "Distance setup: Caregiver A starts seated approximately 1 metre from the child; Caregiver B (physical prompter) remains near the child",
         ],

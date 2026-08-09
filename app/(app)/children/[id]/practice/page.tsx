@@ -4,8 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/server";
-import { PASS_MARK, nextRetakeSessionId } from "@/lib/engine/advancement";
+import { PASS_MARK, REQUIRED_CONSECUTIVE_PASSES, nextRetakeSessionId } from "@/lib/engine/advancement";
 
 /**
  * Practice picker: the current phase's sessions, each with its best attempt so
@@ -82,6 +83,26 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
     .eq("child_id", id)
     .not("completed_at", "is", null)
     .order("completed_at", { ascending: true });
+
+  // ── Phase goal + progress (owner feedback: the caregiver must always know
+  // the target and what happens next). Mirrors /sessions/complete exactly:
+  // trailing run of passes (≥ PASS_MARK) across ALL completed attempts in this
+  // phase, any variant. 3 in a row → the next phase.
+  const phaseSessionIds = new Set((allSessions ?? []).map((s) => s.id));
+  const phaseAttempts = (attempts ?? []).filter((a) => phaseSessionIds.has(a.session_id));
+  let consecutivePasses = 0;
+  for (let i = phaseAttempts.length - 1; i >= 0; i--) {
+    if (Number(phaseAttempts[i].score_percent ?? 0) >= PASS_MARK) consecutivePasses++;
+    else break;
+  }
+  const { data: nextPhase } = phase
+    ? await supabase
+        .schema("curriculum_content")
+        .from("phases")
+        .select("phase_number, name")
+        .eq("phase_number", phase.phase_number + 1)
+        .maybeSingle()
+    : { data: null };
 
   // ── Variant resolution: ONE card per session_number ────────────────────────
   // A bracket-specific variant and an "all ages" variant of the same
@@ -174,6 +195,34 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
           </p>
         ) : null}
       </div>
+
+      {phase ? (
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle className="text-base">The goal for this phase</CardTitle>
+            <CardDescription>
+              {child.name} moves on when a session scores {PASS_MARK}% or higher, {REQUIRED_CONSECUTIVE_PASSES} sessions
+              in a row.
+              {nextPhase ? ` Next up: Phase ${nextPhase.phase_number} — ${nextPhase.name}.` : " This is the final phase of the programme."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <Progress
+              value={(Math.min(consecutivePasses, REQUIRED_CONSECUTIVE_PASSES) / REQUIRED_CONSECUTIVE_PASSES) * 100}
+              label="Progress toward the next phase"
+            />
+            <p className="text-xs text-muted-foreground">
+              {consecutivePasses === 0
+                ? `No passing sessions in a row yet — the "Start here" activity below is the place to begin.`
+                : `${Math.min(consecutivePasses, REQUIRED_CONSECUTIVE_PASSES)} of ${REQUIRED_CONSECUTIVE_PASSES} passing sessions in a row — ${
+                    consecutivePasses >= REQUIRED_CONSECUTIVE_PASSES - 1 && nextPhase
+                      ? `one more and ${child.name} moves to Phase ${nextPhase.phase_number}!`
+                      : "keep going!"
+                  }`}
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {phase?.phase_guidance ? (
         <Card>

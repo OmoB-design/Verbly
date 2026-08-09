@@ -47,10 +47,12 @@ export function SessionRunner({
   childId,
   childName,
   sessionId,
+  caregiverName,
 }: {
   childId: string;
   childName: string;
   sessionId: string;
+  caregiverName?: string | null;
 }) {
   const supabase = React.useMemo(() => createClient(), []);
 
@@ -77,6 +79,18 @@ export function SessionRunner({
 
   const script = start?.script ?? null;
   const totalCheckins = script?.checkin.count ?? 0;
+
+  // Display-time personalization of the script's role names (owner feedback
+  // 2026-08-09): "Caregiver A" → the account holder's name (from signup),
+  // "Caregiver B" → the helper named in setup. Content itself is untouched;
+  // when no name exists, the role names stay as written.
+  const helperDisplayName = helperPresent && helperRole === "secondary" ? helperName.trim() : "";
+  const personalize = (text: string): string => {
+    let t = text;
+    if (caregiverName) t = t.replaceAll("Caregiver A", caregiverName);
+    if (helperDisplayName) t = t.replaceAll("Caregiver B", helperDisplayName);
+    return t;
+  };
 
   // Countdown timer: ticks only while running, not paused, and no check-in is
   // awaiting an answer.
@@ -323,7 +337,7 @@ export function SessionRunner({
 
         {script.overview ? (
           <Card>
-            <CardContent className="py-4 text-sm text-muted-foreground">{script.overview}</CardContent>
+            <CardContent className="py-4 text-sm text-muted-foreground">{personalize(script.overview)}</CardContent>
           </Card>
         ) : null}
 
@@ -335,7 +349,7 @@ export function SessionRunner({
             <CardContent>
               <ul className="list-inside list-disc text-sm text-muted-foreground">
                 {script.materials.map((m, i) => (
-                  <li key={i}>{m}</li>
+                  <li key={i}>{personalize(m)}</li>
                 ))}
               </ul>
             </CardContent>
@@ -353,7 +367,7 @@ export function SessionRunner({
                   <span className="text-muted-foreground">{i + 1}.</span>
                   <span>
                     <span className="font-medium">{s.title}</span>
-                    <span className="block text-muted-foreground">{s.instruction}</span>
+                    <span className="block text-muted-foreground">{personalize(s.instruction)}</span>
                   </span>
                 </li>
               ))}
@@ -463,7 +477,7 @@ export function SessionRunner({
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{script.checkin.question}</CardTitle>
+              <CardTitle className="text-base">{personalize(script.checkin.question)}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
               {script.checkin.options.map((opt, i) => (
@@ -481,7 +495,7 @@ export function SessionRunner({
           <ol className="mt-2 flex flex-col gap-2 pl-5">
             {script.steps.map((s, i) => (
               <li key={i}>
-                <span className="font-medium text-foreground/80">{s.title}:</span> {s.instruction}
+                <span className="font-medium text-foreground/80">{s.title}:</span> {personalize(s.instruction)}
               </li>
             ))}
           </ol>

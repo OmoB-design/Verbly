@@ -185,6 +185,15 @@ export function AssessmentFlow({ childId, childName }: { childId: string; childN
     }
   }
 
+  // Auto-save on EVERY selection (debounced), not only on next/back — a closed
+  // tab mid-question loses nothing (owner feedback 2026-08-09).
+  React.useEffect(() => {
+    if (phase !== "questions" || !start) return;
+    const t = setTimeout(() => void saveDraft(idx), 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [responses, benchmarkAnswers, redFlagAnswers, secondAdult, concernYes, concernText]);
+
   async function saveAndExit() {
     if (!start) return;
     setSavingExit(true);
@@ -511,10 +520,12 @@ function OptionButton({
 }
 
 function QuestionText({ hint, children }: { hint?: string; children: React.ReactNode }) {
+  // Hint sits ABOVE the question as context, so it never reads as part of the
+  // question itself (owner feedback 2026-08-09).
   return (
     <div className="flex flex-col gap-1">
+      {hint ? <p className="text-xs italic text-muted-foreground">{hint}</p> : null}
       <h2 className="text-lg font-medium leading-snug">{children}</h2>
-      {hint ? <p className="text-sm text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

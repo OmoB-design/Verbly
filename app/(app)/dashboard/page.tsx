@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate } from "@/lib/format";
+import { formatAge, formatDate } from "@/lib/format";
 
 /**
  * Caregiver home. Lists the caregiver's children (RLS-scoped — no app-side
@@ -71,7 +71,11 @@ export default async function DashboardPage() {
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground">
                       {phase ? phase.name : "No phase yet"}
-                      {child.dob ? <span className="block">Born {formatDate(child.dob)}</span> : null}
+                      {child.dob ? (
+                        <span className="block">
+                          Age: {formatAge(child.dob)} · Born {formatDate(child.dob)}
+                        </span>
+                      ) : null}
                     </CardContent>
                   </Card>
                 </Link>

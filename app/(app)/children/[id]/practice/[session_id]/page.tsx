@@ -25,12 +25,22 @@ export default async function RunSessionPage({
   const { data: child } = await supabase.from("children").select("id, name").eq("id", id).maybeSingle();
   if (!child) notFound();
 
+  // The account holder's name personalizes the "Caregiver A" role in the
+  // script text (display-time only); the helper's name from setup personalizes
+  // "Caregiver B".
+  const { data: caregiver } = await supabase.from("caregivers").select("full_name").eq("id", user.id).maybeSingle();
+
   return (
     <div className="flex flex-col gap-2">
       <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2 self-start">
         <Link href={`/children/${id}/practice`}>← All activities</Link>
       </Button>
-      <SessionRunner childId={id} childName={child.name} sessionId={session_id} />
+      <SessionRunner
+        childId={id}
+        childName={child.name}
+        sessionId={session_id}
+        caregiverName={caregiver?.full_name ?? null}
+      />
     </div>
   );
 }
