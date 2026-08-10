@@ -19,6 +19,10 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // SLP accounts have a caseload, not a caregiver dashboard.
+  const { data: slp } = await supabase.from("slps").select("id").eq("id", user.id).maybeSingle();
+  if (slp) redirect("/slp");
+
   const { data: children, error } = await supabase
     .from("children")
     .select("id, name, dob, current_phase_id, created_at")

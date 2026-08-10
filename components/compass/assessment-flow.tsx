@@ -251,6 +251,7 @@ export function AssessmentFlow({ childId, childName }: { childId: string; childN
           redFlagAnswers,
           secondAdultAvailable: secondAdult,
           freeTextConcern: concernYes === true,
+          concernText: concernYes === true ? concernText.trim() : "",
         }),
       });
       const data = await res.json();

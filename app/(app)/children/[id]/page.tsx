@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatAge, formatDate, outcomeLabel, triggerReasonLabel } from "@/lib/format";
+import { SlpShareCard } from "@/components/slp/share-card";
 
 export default async function ChildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -43,6 +45,35 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
     .limit(1)
     .maybeSingle();
   const hasCompass = !!scoredAssessment;
+
+  // SLP sharing state: linked SLPs (RLS lets the caregiver see the links; the
+  // SLP names come via the admin client — slps rows are self-read-only),
+  // pending invites, and caregiver-visible SLP notes.
+  const { data: links } = await supabase.from("slp_child_links").select("slp_id").eq("child_id", id);
+  const admin = createAdminClient();
+  const linkedSlps: { id: string; name: string }[] = [];
+  if ((links ?? []).length > 0) {
+    const { data: slpRows } = await admin
+      .from("slps")
+      .select("id, full_name")
+      .in("id", (links ?? []).map((l) => l.slp_id));
+    for (const s of slpRows ?? []) linkedSlps.push({ id: s.id, name: s.full_name ?? "Your SLP" });
+  }
+  const { data: invites } = await supabase
+    .from("slp_invites")
+    .select("id, token, expires_at, redeemed_at, revoked_at")
+    .eq("child_id", id)
+    .order("created_at", { ascending: false });
+  const pendingInvites = (invites ?? []).filter(
+    (i) => !i.redeemed_at && !i.revoked_at && new Date(i.expires_at).getTime() > Date.now(),
+  );
+  const { data: slpNotes } = await supabase
+    .from("slp_notes")
+    .select("id, slp_id, body, created_at")
+    .eq("child_id", id)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const noteAuthor = new Map(linkedSlps.map((s) => [s.id, s.name]));
 
   // Phase history (the single audit trail), newest first.
   const { data: history } = await supabase
@@ -131,6 +162,27 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
         </CardContent>
       </Card>
 
+      {(slpNotes ?? []).length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Notes from your SLP</CardTitle>
+            <CardDescription>Professional observations shared with you — always visible, never hidden.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col gap-3">
+              {(slpNotes ?? []).map((n) => (
+                <li key={n.id} className="rounded-lg border px-3 py-2">
+                  <p className="text-sm whitespace-pre-line">{n.body}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {noteAuthor.get(n.slp_id) ?? "Your SLP"} · {formatDate(n.created_at)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Recent sessions</CardTitle>
@@ -187,6 +239,13 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           )}
         </CardContent>
       </Card>
+
+      <SlpShareCard
+        childId={id}
+        childName={child.name}
+        linkedSlps={linkedSlps}
+        pendingInvites={pendingInvites.map((i) => ({ id: i.id, token: i.token, expires_at: i.expires_at }))}
+      />
     </div>
   );
 }

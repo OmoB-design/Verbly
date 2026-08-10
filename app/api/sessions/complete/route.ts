@@ -240,13 +240,21 @@ export async function POST(request: Request) {
   activityScores.push(score);
   const baselinePool = activityScores.slice(0, -6);
   if (baselinePool.length >= 3) {
-    const baseline = baselinePool.reduce((a, b) => a + b, 0) / baselinePool.length;
+    const baseline = Math.round((baselinePool.reduce((a, b) => a + b, 0) / baselinePool.length) * 100) / 100;
+    const recent = activityScores.slice(-6);
     const adv = evaluateDownwardAdvisory({
       activityId: instance.session_id,
-      recentScores: activityScores.slice(-6),
+      recentScores: recent,
       baseline,
     });
     downwardAdvisory = { advise: adv.advise, reason: adv.reason };
+    // Persist every computed evaluation (advise true OR false) on the instance:
+    // the SLP progression view reads the history, and §12 validation work needs
+    // the negatives too. Non-fatal if it fails — the outcome is already saved.
+    await admin
+      .from("session_instances")
+      .update({ downward_advisory: { advise: adv.advise, reason: adv.reason, baseline, recent } })
+      .eq("id", sessionInstanceId);
   }
 
   return NextResponse.json({

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useActionState } from "react";
 
 import { login } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [state, formAction, pending] = useActionState(login, undefined);
+  const next = useSearchParams().get("next") ?? "";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-6 py-16">
@@ -21,6 +31,7 @@ export default function LoginPage() {
       </div>
 
       <form action={formAction} className="flex flex-col gap-4">
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <Input id="email" name="email" type="email" autoComplete="email" required />
@@ -49,7 +60,10 @@ export default function LoginPage() {
 
       <p className="text-sm text-muted-foreground">
         No account?{" "}
-        <Link href="/signup" className="text-primary underline-offset-4 hover:underline">
+        <Link
+          href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
+          className="text-primary underline-offset-4 hover:underline"
+        >
           Create one
         </Link>
       </p>

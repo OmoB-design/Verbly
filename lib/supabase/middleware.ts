@@ -43,7 +43,9 @@ export async function updateSession(request: NextRequest) {
   // authenticate themselves (a Supabase session, or a Bearer secret for cron)
   // and return their own 401 JSON — redirecting them to an HTML login page
   // would be wrong for API clients and breaks the secret-authed cron route.
-  const publicPaths = ["/", "/login", "/signup", "/auth"];
+  // /invite is public: an SLP opening a caregiver's invite link may have no
+  // account yet — the page itself walks them to signup/login and back.
+  const publicPaths = ["/", "/login", "/signup", "/auth", "/invite"];
   const { pathname } = request.nextUrl;
   const isApi = pathname.startsWith("/api");
   const isPublic = publicPaths.some(

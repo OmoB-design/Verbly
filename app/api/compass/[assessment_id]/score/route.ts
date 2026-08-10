@@ -45,6 +45,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ass
     redFlagAnswers?: Record<string, boolean>;
     secondAdultAvailable?: SecondAdult;
     freeTextConcern?: boolean;
+    concernText?: string;
   };
   try {
     body = await request.json();
@@ -115,6 +116,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ ass
       red_flags: result.red_flags,
       referral_recommended: result.referral_recommended,
       suggested_reassessment_interval: result.suggested_reassessment_interval,
+      // §7.1: the concern TEXT is part of the record (routed to human review
+      // via the SLP surface), not just the boolean the engine consumes.
+      concern_text:
+        body.freeTextConcern === true && typeof body.concernText === "string" && body.concernText.trim()
+          ? body.concernText.trim()
+          : null,
       raw_payload: result,
     })
     .eq("id", assessment_id);
