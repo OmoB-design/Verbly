@@ -31,6 +31,13 @@
  *
  * "Retake, lowest-scoring session first" is a SEQUENCING concern for what the
  * runtime offers next, not a per-session outcome — see `nextRetakeSessionId`.
+ *
+ * ── SIMPLIFIED SESSIONS IN THE GRADUATION WINDOW (owner ruling 2026-08-09) ──
+ * Simplified-session passes COUNT toward the 3-consecutive-pass run, but the
+ * graduating pass — the one that actually triggers advancement — must be a
+ * STANDARD session. If the 3rd consecutive pass happens on a Simplified
+ * variant, the run continues (it does not reset); the child advances on their
+ * next standard-session pass. Uniform across all 12 phases.
  * ────────────────────────────────────────────────────────────────────────────
  */
 
@@ -74,6 +81,10 @@ export interface AdvancementContext {
   /** How many times THIS same curriculum session has already failed for this
    *  child before this attempt (used to detect retake → simplify). */
   priorFailedAttemptsThisSession: number;
+  /** Whether THIS attempt ran the Simplified variant. A simplified pass counts
+   *  in the consecutive run but cannot be the graduating pass (owner ruling
+   *  2026-08-09). */
+  ranSimplified?: boolean;
   /** Overridable only for testing; defaults to the locked values. */
   passMark?: number;
   requiredConsecutive?: number;
@@ -103,14 +114,19 @@ export function decideAdvancement(ctx: AdvancementContext): AdvancementDecision 
 
   if (passed) {
     const consecutivePasses = ctx.priorConsecutivePasses + 1;
-    const advancesPhase = consecutivePasses >= requiredConsecutive;
+    const runComplete = consecutivePasses >= requiredConsecutive;
+    // The graduating pass must be a STANDARD session: a simplified pass keeps
+    // the run alive but defers advancement to the next standard pass.
+    const advancesPhase = runComplete && ctx.ranSimplified !== true;
     return {
       outcome: "advance",
       advancesPhase,
       consecutivePasses,
       reason: advancesPhase
         ? `Passed (${ctx.score}% ≥ ${passMark}%); ${consecutivePasses} consecutive passes met the ${requiredConsecutive}-session graduation criterion.`
-        : `Passed (${ctx.score}% ≥ ${passMark}%); ${consecutivePasses}/${requiredConsecutive} consecutive passes so far — proceed within phase.`,
+        : runComplete
+          ? `Passed (${ctx.score}% ≥ ${passMark}%) on the Simplified variant; the run of ${consecutivePasses} continues, but the graduating pass must be a standard session — the next standard pass advances.`
+          : `Passed (${ctx.score}% ≥ ${passMark}%); ${consecutivePasses}/${requiredConsecutive} consecutive passes so far — proceed within phase.`,
     };
   }
 

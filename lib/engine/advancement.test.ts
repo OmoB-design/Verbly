@@ -111,3 +111,62 @@ describe("nextRetakeSessionId — lowest-scoring session first", () => {
     ).toBe("early");
   });
 });
+
+describe("decideAdvancement — simplified sessions in the graduation window (ruling 2026-08-09)", () => {
+  it("a simplified pass counts in the run but does NOT trigger graduation on the 3rd consecutive", () => {
+    const d = decideAdvancement({
+      score: 100,
+      priorConsecutivePasses: 2,
+      priorFailedAttemptsThisSession: 0,
+      ranSimplified: true,
+    });
+    expect(d.outcome).toBe("advance");
+    expect(d.advancesPhase).toBe(false); // run complete, but graduating pass must be standard
+    expect(d.consecutivePasses).toBe(3); // the run continues — no reset
+    expect(d.reason).toContain("next standard pass");
+  });
+
+  it("the next STANDARD pass after a deferred graduation advances (4th consecutive)", () => {
+    const d = decideAdvancement({
+      score: 80,
+      priorConsecutivePasses: 3, // includes the earlier simplified pass
+      priorFailedAttemptsThisSession: 0,
+      ranSimplified: false,
+    });
+    expect(d.advancesPhase).toBe(true);
+    expect(d.consecutivePasses).toBe(4);
+  });
+
+  it("a simplified pass mid-run (1st/2nd consecutive) behaves like any pass", () => {
+    const d = decideAdvancement({
+      score: 90,
+      priorConsecutivePasses: 0,
+      priorFailedAttemptsThisSession: 0,
+      ranSimplified: true,
+    });
+    expect(d.outcome).toBe("advance");
+    expect(d.advancesPhase).toBe(false);
+    expect(d.consecutivePasses).toBe(1);
+  });
+
+  it("a standard 3rd consecutive pass still graduates (rule unchanged for standard sessions)", () => {
+    const d = decideAdvancement({
+      score: 75,
+      priorConsecutivePasses: 2,
+      priorFailedAttemptsThisSession: 0,
+      ranSimplified: false,
+    });
+    expect(d.advancesPhase).toBe(true);
+  });
+
+  it("a failing simplified attempt still resets the run", () => {
+    const d = decideAdvancement({
+      score: 50,
+      priorConsecutivePasses: 2,
+      priorFailedAttemptsThisSession: 0,
+      ranSimplified: true,
+    });
+    expect(d.outcome).toBe("retake");
+    expect(d.consecutivePasses).toBe(0);
+  });
+});

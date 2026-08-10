@@ -13,6 +13,7 @@ import {
   runAgeBracketEvaluation,
   type AgeBracketResult,
 } from "@/lib/engine/age-bracket-runtime";
+import { evaluateDownwardAdvisory } from "@/lib/engine/age-bracket";
 
 /**
  * POST /api/sessions/complete
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
   // Authorize via RLS: the caller only sees their own child's instance.
   const { data: instance, error: instErr } = await supabase
     .from("session_instances")
-    .select("id, child_id, session_id, completed_at")
+    .select("id, child_id, session_id, completed_at, ran_simplified")
     .eq("id", sessionInstanceId)
     .maybeSingle();
   if (instErr) return NextResponse.json({ error: instErr.message }, { status: 500 });
@@ -166,6 +167,9 @@ export async function POST(request: Request) {
     score,
     priorConsecutivePasses,
     priorFailedAttemptsThisSession,
+    // Owner ruling 2026-08-09: a simplified pass counts in the run but cannot
+    // be the graduating pass.
+    ranSimplified: instance.ran_simplified === true,
   });
 
   // 4. Persist the outcome (service role — users cannot write these fields).
@@ -222,6 +226,29 @@ export async function POST(request: Request) {
     }
   }
 
+  // 7. Downward advisory (advisory-only — never moves the variant). Fires on a
+  //    persistent, activity-specific drop clearly below the child's own
+  //    baseline across the last 5–6 attempts at THIS activity.
+  //    OPERATIONAL INTERPRETATION (launch default, flagged for sign-off):
+  //    baseline = mean of this activity's completed attempts BEFORE the recent
+  //    6-attempt window, requiring ≥3 baseline attempts to call it
+  //    "established"; margin = engine default (15 pts).
+  let downwardAdvisory: { advise: boolean; reason: string } | null = null;
+  const activityScores = completed
+    .filter((r) => r.session_id === instance.session_id)
+    .map((r) => Number(r.score_percent ?? 0));
+  activityScores.push(score);
+  const baselinePool = activityScores.slice(0, -6);
+  if (baselinePool.length >= 3) {
+    const baseline = baselinePool.reduce((a, b) => a + b, 0) / baselinePool.length;
+    const adv = evaluateDownwardAdvisory({
+      activityId: instance.session_id,
+      recentScores: activityScores.slice(-6),
+      baseline,
+    });
+    downwardAdvisory = { advise: adv.advise, reason: adv.reason };
+  }
+
   return NextResponse.json({
     outcome: decision.outcome,
     score_percent: score,
@@ -229,5 +256,6 @@ export async function POST(request: Request) {
     advancedToPhaseNumber,
     reason: decision.reason,
     ageBracket,
+    downwardAdvisory,
   });
 }

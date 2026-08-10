@@ -55,10 +55,16 @@ export function startingPhaseHeadline(childName: string, phase: number): string 
  * readiness module first (intended §5.4/§14.9), so this is the string caregivers
  * will actually see; the start_directly copy is here for when thresholds are
  * calibrated later.
+ *
+ * Owner ruling 2026-08-09: readiness_module_first currently serves the placed
+ * phase's Simplified Session as the introductory first session (see
+ * /api/sessions/start). TODO(readiness-modules): dedicated 5-item readiness
+ * checks are to be authored before the dissertation cohort — this copy and the
+ * ease-in behaviour are the interim, not a placeholder flow to build on.
  */
 export function placementModeCopy(mode: "start_directly" | "readiness_module_first", childName: string): string {
   return mode === "readiness_module_first"
-    ? `We'll ease ${childName} in with a short readiness activity before the main phase — a gentle way to get comfortable with how sessions work.`
+    ? `We'll start with an introductory session to see how ${childName} settles in.`
     : `${childName} is ready to begin this phase directly.`;
 }
 

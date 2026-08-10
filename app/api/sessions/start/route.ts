@@ -94,6 +94,7 @@ export async function POST(request: Request) {
   // the Simplified variant when the child's most recent completed attempt at
   // THIS session ended simplify_triggered and the script provides one.
   let runSimplified = false;
+  let simplifiedReason: "retake_support" | "readiness_ease_in" | null = null;
   const { data: lastAttempt } = await admin
     .from("session_instances")
     .select("outcome")
@@ -105,6 +106,48 @@ export async function POST(request: Request) {
     .maybeSingle();
   if (lastAttempt?.outcome === "simplify_triggered" && script.simplified) {
     runSimplified = true;
+    simplifiedReason = "retake_support";
+  }
+
+  // Readiness ease-in (owner ruling 2026-08-09, interim for §6.3): when the
+  // Compass placed this child with placement_mode = readiness_module_first,
+  // the very FIRST session they run in the placed phase is served as its
+  // gentler Simplified variant.
+  // TODO(readiness-modules): dedicated 5-item readiness checks per phase are to
+  // be authored before the dissertation cohort; when they exist, this ease-in
+  // is replaced by the real readiness module flow. Do not build a placeholder.
+  if (!runSimplified && script.simplified) {
+    const { data: assessment } = await admin
+      .from("assessments")
+      .select("starting_phase, placement_mode")
+      .eq("child_id", child_id)
+      .eq("status", "scored")
+      .order("completed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (
+      assessment?.placement_mode === "readiness_module_first" &&
+      assessment.starting_phase === session.phase_number
+    ) {
+      const { data: phaseSessions } = await admin
+        .schema("curriculum_content")
+        .from("sessions")
+        .select("id")
+        .eq("phase_number", session.phase_number);
+      const phaseSessionIds = (phaseSessions ?? []).map((s) => s.id as string);
+      if (phaseSessionIds.length > 0) {
+        const { count } = await admin
+          .from("session_instances")
+          .select("id", { count: "exact", head: true })
+          .eq("child_id", child_id)
+          .not("completed_at", "is", null)
+          .in("session_id", phaseSessionIds);
+        if ((count ?? 0) === 0) {
+          runSimplified = true;
+          simplifiedReason = "readiness_ease_in";
+        }
+      }
+    }
   }
 
   // Insert through the caller's own session so the RLS with-check
@@ -134,6 +177,7 @@ export async function POST(request: Request) {
     phase_number: session.phase_number,
     session_number: session.session_number,
     simplified: runSimplified,
+    simplified_reason: simplifiedReason,
     script: variant,
   });
 }

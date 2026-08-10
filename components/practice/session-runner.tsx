@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/client";
 import type { ScriptVariant } from "@/lib/engine/session-script";
+import { SoundCapture } from "@/components/practice/sound-capture";
 
 /**
  * Session runtime. Executes the version-pinned RL behavior script locally:
@@ -25,6 +26,7 @@ interface StartPayload {
   phase_number: number;
   session_number: number;
   simplified: boolean;
+  simplified_reason?: "retake_support" | "readiness_ease_in" | null;
   script: ScriptVariant;
 }
 
@@ -35,6 +37,7 @@ interface CompletePayload {
   advancedToPhaseNumber: number | null;
   reason: string;
   ageBracket: { transitioned?: boolean } | null;
+  downwardAdvisory: { advise: boolean; reason: string } | null;
 }
 
 type Stage = "setup" | "starting" | "brief" | "running" | "completing" | "done" | "error";
@@ -331,7 +334,11 @@ export function SessionRunner({
           <h1 className="text-2xl font-semibold tracking-tight">{script.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Phase {start!.phase_number}, Session {start!.session_number}
-            {start!.simplified ? " · a gentler version this time" : ""}
+            {start!.simplified
+              ? start!.simplified_reason === "readiness_ease_in"
+                ? " · a gentle introductory version to settle in"
+                : " · a gentler version this time"
+              : ""}
           </p>
         </div>
 
@@ -501,6 +508,10 @@ export function SessionRunner({
           </ol>
         </details>
 
+        {/* Vocalization capture — always available; the curriculum asks for
+            sounds to be documented as they happen (esp. Phases 9–12). */}
+        <SoundCapture childId={childId} childName={childName} sessionInstanceId={start!.session_instance_id} />
+
         {checkinIdx > 0 ? (
           <button
             type="button"
@@ -549,6 +560,19 @@ export function SessionRunner({
           {r.ageBracket && "transitioned" in (r.ageBracket ?? {}) && r.ageBracket.transitioned ? (
             <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-foreground/80">
               {childName} has been doing so well that we&apos;ll present activities in an older style from now on.
+            </p>
+          ) : null}
+          {r.outcome === "advance" && !r.advancesPhase && start?.simplified ? (
+            <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-foreground/80">
+              A pass on the gentler version keeps the streak going — passing a standard session is what moves{" "}
+              {childName} to the next phase.
+            </p>
+          ) : null}
+          {r.downwardAdvisory?.advise ? (
+            <p className="rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/40 dark:text-amber-100">
+              We&apos;ve noticed this particular activity has been tougher than usual over the last several sessions.
+              It might land better framed for a slightly younger age — just for this activity, and only if it feels
+              right to you. Nothing changes automatically.
             </p>
           ) : null}
           <div className="flex gap-2">
