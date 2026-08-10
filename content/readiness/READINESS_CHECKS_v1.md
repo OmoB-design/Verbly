@@ -1,17 +1,29 @@
-# Readiness Checks — Draft v0.1 (FOR CLINICAL REVIEW)
+# Readiness Checks — v1.0.0 (APPROVED)
 
-**Status: DRAFT — not seeded, not wired. Nothing here reaches the app until the owner approves.**
+**Status: APPROVED by the owner (clinical authority) 2026-08-09, with three edits applied
+and all four review flags confirmed. Seeded as `readiness_content` schema_version 1.**
 
 Drafted 2026-08-09 per owner decisions 1–5 (below). Every item is **derived** — authored by
 the assistant from each phase's §6.1 prerequisite driver / entry condition
 (caregiver-onboarding-assessment-blueprint-v2_1.md) and the transcribed curriculum's phase
-entry skills — none is transcribed verbatim from a source document. The owner reviews and
-approves as clinical authority before seeding (same process as curriculum flag F2).
+entry skills — none is transcribed verbatim from a source document. Reviewed and approved
+by the owner as clinical authority (same process as curriculum flag F2).
 
-**How to red-pen:** edit item wording directly in this file, strike items, swap the HARD
-designation, or annotate inline. On approval, this content is versioned (`readiness_content`,
-schema-versioned like `compass_content`), seeded, and wired; the interim Simplified ease-in
-is then retired.
+**Approval edits (owner, 2026-08-09):**
+- **E1 — item 4.4 replaced.** Second-adult availability is already captured at onboarding
+  (`second_adult_available`); asking again was redundant. Replaced with an object-release
+  item testing the release component of the PECS exchange.
+- **E2 — Phase 12 HARD moved 12.2 → 12.1.** 12.1 (understood without speech) tests the
+  defining Phase 12 profile — speech as the isolated gap. 12.2 (makes sounds on purpose)
+  is what the phase teaches, not what it requires.
+- **E3 — item 3.4 tightened.** Red-flag behaviours (coughing, gagging, choking) made
+  explicit so "comfortable" isn't read as a mood question.
+
+**Flag confirmations:** R-F1 confirmed (P1 check softens entry, never redirects);
+R-F2 keep the safety duplication (belt-and-braces); R-F3 correct as designed;
+R-F4 translations faithful.
+
+Any future edit to this content is a clinical change: new `schema_version`, owner sign-off.
 
 ---
 
@@ -85,7 +97,7 @@ populations).
 | 3.1 | Will your child usually watch you make faces or mouth movements when you invite them to? | P3 method: exercises are modelled face-to-face | **HARD** |
 | 3.2 | Can your child copy at least some big body movements when you show them — clapping, arms up? | §6.1 sequencing: imitation precedes oral-motor work (P2 exit) | |
 | 3.3 | Will your child usually tolerate playful activities near their face — bubbles, straws, blowing games — without much distress? | P3 materials/activities | |
-| 3.4 | Is your child usually comfortable at mealtimes — eating and drinking without frequent coughing or choking? | §3.8 / §7.1: choking is a red-flag needing professional input before mouth-work | |
+| 3.4 | Is your child usually comfortable eating and drinking — without frequent coughing, gagging, or choking? | §3.8 / §7.1: choking is a red-flag needing professional input before mouth-work (wording per owner edit E3) | |
 | 3.5 | Does your child make sounds in play on their own — babbling, humming, raspberries? | §6.1 driver: speech_sound (sound-play foundation) | |
 
 **[X] for 3.1:** "watching your mouth and face"
@@ -99,7 +111,7 @@ Route (§6.1): functional_communication < 40, with basic imitation present.
 | 4.1 | Does your child have three to five favourite things — foods, toys, activities — they clearly want when they see them? | P4 protocol: preferred items are the engine of the exchange | **HARD** |
 | 4.2 | When your child wants something they can see, do they usually do something about it — reach, pull you, fuss, move toward it? | §6.1 driver: functional_communication (§3.5 hierarchy family) | |
 | 4.3 | Will your child usually accept a moment of gentle hand-over-hand help without becoming very upset? | P4 protocol: physical prompter guides the exchange | |
-| 4.4 | Is a second adult sometimes available to help during practice? | §6.7 two-adult requirement (P4/P5) | |
+| 4.4 | Does your child usually let go of an object when you gently hold your hand out for it? | P4 protocol: the release component of the exchange (owner edit E1 — replaced redundant second-adult item; that fact is captured at onboarding) | |
 | 4.5 | Can your child pick up a flat card-sized object with their hand? | P4 motor prerequisite of the exchange | |
 
 **[X] for 4.1:** "strong favourites to work with"
@@ -209,13 +221,13 @@ Route (§6.1): speech_sound < 40 AND other domains ≥ 55 — speech is the isol
 
 | # | Item (yes/no) | Provenance (all derived) | Hard |
 |---|---|---|---|
-| 12.1 | Setting speech aside, does your child usually make themselves understood — with signs, pictures, or gestures? | §6.1 entry condition ("other domains ≥ 55" — a strong non-speech communicator) | |
-| 12.2 | Does your child make some sounds on purpose — babble, hums, sound effects in play? | P12 method: shaping needs raw sounds to shape | **HARD** |
+| 12.1 | Setting speech aside, does your child usually make themselves understood — with signs, pictures, or gestures? | §6.1 entry condition ("other domains ≥ 55" — the defining P12 profile; HARD per owner edit E2) | **HARD** |
+| 12.2 | Does your child make some sounds on purpose — babble, hums, sound effects in play? | P12 method: shaping needs raw sounds to shape (what the phase teaches, not what it requires — E2) | |
 | 12.3 | Does your child usually copy actions or gestures you show them? | §6.1 sequencing: motor imitation underpins vocal imitation (P2 exit) | |
 | 12.4 | Will your child usually join in sound-play with you — silly noises, animal sounds, singing — without distress? | P12 activities | |
 | 12.5 | Does your child usually watch your mouth or face when you make interesting sounds? | P12 method: attending to the vocal model | |
 
-**[X] for 12.2:** "making sounds on purpose"
+**[X] for 12.1:** "communicating without relying on speech"
 
 ---
 

@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/server";
 import { PASS_MARK, REQUIRED_CONSECUTIVE_PASSES, nextRetakeSessionId } from "@/lib/engine/advancement";
+import { ReadinessCheck } from "@/components/readiness/readiness-check";
+import type { ReadinessContent } from "@/content/readiness/readiness-checks";
 
 /**
  * Practice picker: the current phase's sessions, each with its best attempt so
@@ -103,6 +105,62 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
         .eq("phase_number", phase.phase_number + 1)
         .maybeSingle()
     : { data: null };
+
+  // ── Readiness check gate (§6.3, owner-approved v1.0.0) ─────────────────────
+  // Before the FIRST session of the Compass-placed phase, a readiness-routed
+  // child gets the one-shot 5-question check. /sessions/start enforces this
+  // server-side too (409); here we put the check itself in the caregiver's
+  // path. After it's done: a hard-item flag shows as a keep-an-eye note for
+  // the first few sessions; a fail silently serves Simplified at start.
+  let readinessKeepAnEye: string | null = null;
+  if (phase && phaseAttempts.length === 0) {
+    const { data: assessment } = await supabase
+      .from("assessments")
+      .select("id, starting_phase, placement_mode")
+      .eq("child_id", id)
+      .eq("status", "scored")
+      .order("completed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (assessment?.placement_mode === "readiness_module_first" && assessment.starting_phase === phase.phase_number) {
+      const { data: readinessResult } = await supabase
+        .from("readiness_check_results")
+        .select("passed, hard_item_flagged, flag_phrase")
+        .eq("assessment_id", assessment.id)
+        .maybeSingle();
+      if (!readinessResult) {
+        const { data: contentRow } = await supabase
+          .from("readiness_content")
+          .select("content_json")
+          .order("schema_version", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const check = (contentRow?.content_json as ReadinessContent | undefined)?.phases.find(
+          (p) => p.phase_number === phase.phase_number,
+        );
+        if (check) {
+          return (
+            <div className="flex flex-col gap-4">
+              <div>
+                {backLink}
+                <h1 className="text-2xl font-semibold tracking-tight">Practice with {child.name}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Phase {phase.phase_number} — {phase.name}
+                </p>
+              </div>
+              <ReadinessCheck
+                assessmentId={assessment.id}
+                childName={child.name}
+                items={check.items.map((i) => ({ id: i.id, prompt: i.prompt }))}
+              />
+            </div>
+          );
+        }
+      } else if (readinessResult.hard_item_flagged && readinessResult.flag_phrase) {
+        readinessKeepAnEye = readinessResult.flag_phrase;
+      }
+    }
+  }
 
   // ── Variant resolution: ONE card per session_number ────────────────────────
   // A bracket-specific variant and an "all ages" variant of the same
@@ -222,6 +280,12 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
             </p>
           </CardContent>
         </Card>
+      ) : null}
+
+      {readinessKeepAnEye ? (
+        <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-foreground/80">
+          From the readiness check: keep an eye on {readinessKeepAnEye} during the first few sessions.
+        </p>
       ) : null}
 
       {phase?.phase_guidance ? (

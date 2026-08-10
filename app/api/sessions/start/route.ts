@@ -109,17 +109,19 @@ export async function POST(request: Request) {
     simplifiedReason = "retake_support";
   }
 
-  // Readiness ease-in (owner ruling 2026-08-09, interim for §6.3): when the
-  // Compass placed this child with placement_mode = readiness_module_first,
-  // the very FIRST session they run in the placed phase is served as its
-  // gentler Simplified variant.
-  // TODO(readiness-modules): dedicated 5-item readiness checks per phase are to
-  // be authored before the dissertation cohort; when they exist, this ease-in
-  // is replaced by the real readiness module flow. Do not build a placeholder.
-  if (!runSimplified && script.simplified) {
+  // Readiness check gate (§6.3, owner-approved content v1.0.0, 2026-08-09 —
+  // replaces the earlier interim ease-in). When the Compass placed this child
+  // with placement_mode = readiness_module_first and they have not yet
+  // completed any session in the placed phase:
+  //   • no readiness result yet → 409 (the UI routes to the 90-second check);
+  //   • result failed (≤3 yes)  → first session serves the Simplified variant
+  //     (phase unchanged); the advance/repeat/simplify loop owns it from there;
+  //   • result passed           → standard session (a lone hard-item NO only
+  //     shows the keep-an-eye flag, it never changes the variant).
+  if (!runSimplified) {
     const { data: assessment } = await admin
       .from("assessments")
-      .select("starting_phase, placement_mode")
+      .select("id, starting_phase, placement_mode")
       .eq("child_id", child_id)
       .eq("status", "scored")
       .order("completed_at", { ascending: false })
@@ -135,14 +137,28 @@ export async function POST(request: Request) {
         .select("id")
         .eq("phase_number", session.phase_number);
       const phaseSessionIds = (phaseSessions ?? []).map((s) => s.id as string);
-      if (phaseSessionIds.length > 0) {
-        const { count } = await admin
-          .from("session_instances")
-          .select("id", { count: "exact", head: true })
-          .eq("child_id", child_id)
-          .not("completed_at", "is", null)
-          .in("session_id", phaseSessionIds);
-        if ((count ?? 0) === 0) {
+      const { count } = await admin
+        .from("session_instances")
+        .select("id", { count: "exact", head: true })
+        .eq("child_id", child_id)
+        .not("completed_at", "is", null)
+        .in("session_id", phaseSessionIds);
+      if ((count ?? 0) === 0) {
+        const { data: readiness } = await admin
+          .from("readiness_check_results")
+          .select("passed")
+          .eq("assessment_id", assessment.id)
+          .maybeSingle();
+        if (!readiness) {
+          return NextResponse.json(
+            {
+              error: "A quick readiness check comes before the first session — it takes about 90 seconds.",
+              code: "readiness_check_required",
+            },
+            { status: 409 },
+          );
+        }
+        if (!readiness.passed && script.simplified) {
           runSimplified = true;
           simplifiedReason = "readiness_ease_in";
         }
