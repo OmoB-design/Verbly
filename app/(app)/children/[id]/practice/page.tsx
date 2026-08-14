@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { PASS_MARK, REQUIRED_CONSECUTIVE_PASSES, nextRetakeSessionId } from "@/lib/engine/advancement";
 import { calculateProgressionState } from "@/lib/engine/progression";
 import { ReadinessCheck } from "@/components/readiness/readiness-check";
-import { PhaseArt, PhaseIconBubble, phaseIdentity } from "@/components/phase-identity";
+import { PhaseIconBubble, PhaseSticker, phaseIdentity } from "@/components/phase-identity";
 import { GrowthMeter } from "@/components/growth-meter";
 import type { ReadinessContent } from "@/content/readiness/readiness-checks";
 
@@ -275,7 +275,7 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
           ) : null}
         </div>
         {phase ? (
-          <PhaseArt phase={phase.phase_number} priority className="mx-0 hidden max-w-44 sm:block" />
+          <PhaseSticker phase={phase.phase_number} className="hidden max-h-32 w-auto sm:block" />
         ) : null}
       </div>
 

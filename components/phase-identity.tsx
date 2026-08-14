@@ -161,6 +161,32 @@ export function PhaseArt({
   );
 }
 
+/** Background-removed variant (Vision-lifted subject, transparent PNG). */
+export function phaseCutoutSrc(phase: number): string | null {
+  if (!Number.isInteger(phase) || phase < 1 || phase > 12) return null;
+  return `/illustrations/phases/phase-${String(phase).padStart(2, "0")}-cutout.png`;
+}
+
+/**
+ * The phase subject floating directly on the page — no mat, no background
+ * (owner ruling: small right-side placements go background-free; the large
+ * hero placements keep the PhaseArt mat). Cutout intrinsic sizes vary per
+ * phase, hence a plain img sized by the caller.
+ */
+export function PhaseSticker({ phase, className }: { phase: number; className?: string }) {
+  const src = phaseCutoutSrc(phase);
+  if (!src) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- decorative, per-file intrinsic sizes
+    <img
+      src={src}
+      alt=""
+      className={cn("animate-in fade-in h-auto drop-shadow-md duration-700 select-none", className)}
+      draggable={false}
+    />
+  );
+}
+
 /** Circular phase icon, for card headers and list rows. */
 export function PhaseIconBubble({
   phase,
