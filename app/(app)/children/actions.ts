@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { CHILD_PROFILE_CAP } from "@/lib/limits";
 
 type ActionState = { error: string } | undefined;
 
@@ -32,6 +33,17 @@ export async function createChild(
     redirect("/login");
   }
 
+  // Profile cap (owner ruling 2026-08-14): friendly check here; the DB trigger
+  // (migration 019) is the enforcement that can't be bypassed.
+  const { count } = await supabase
+    .from("children")
+    .select("id", { count: "exact", head: true });
+  if ((count ?? 0) >= CHILD_PROFILE_CAP) {
+    return {
+      error: `Your account has reached the limit of ${CHILD_PROFILE_CAP} child profiles. To add another child, remove a profile you no longer need first.`,
+    };
+  }
+
   const { error } = await supabase.from("children").insert({
     primary_caregiver_id: user.id,
     name,
@@ -39,7 +51,11 @@ export async function createChild(
   });
 
   if (error) {
-    return { error: error.message };
+    return {
+      error: error.message.includes("profile limit")
+        ? `Your account has reached the limit of ${CHILD_PROFILE_CAP} child profiles.`
+        : error.message,
+    };
   }
 
   revalidatePath("/dashboard");

@@ -48,6 +48,8 @@ Backed by Supabase Auth. One row per caregiver account.
 | `current_phase_id` | FK → `curriculum_content.phases`, denormalized for quick dashboard reads; source of truth is still `phase_history` |
 | `content_version_at_creation` | which curriculum content version was active when this child's therapy began — informational, not a hard lock |
 
+**Profile cap (owner ruling 2026-08-14): 5 children per caregiver account**, enforced by a `BEFORE INSERT` trigger (`enforce_child_profile_cap`, migration 019) with a matching friendly app-layer check (`CHILD_PROFILE_CAP` in `lib/limits.ts` — change both together). Insert-only: accounts already over the cap when the rule landed are grandfathered; nothing is deleted.
+
 ### `slps`
 | Column | Notes |
 |---|---|

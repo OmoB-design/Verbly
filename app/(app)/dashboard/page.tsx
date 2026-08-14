@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { formatAge, formatDate } from "@/lib/format";
+import { CHILD_PROFILE_CAP } from "@/lib/limits";
 
 /**
  * Caregiver home. Lists the caregiver's children (RLS-scoped — no app-side
@@ -43,9 +44,15 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">Your children</h1>
-        <Button asChild className="h-11 px-5">
-          <Link href="/children/new">Add a child</Link>
-        </Button>
+        {(children ?? []).length < CHILD_PROFILE_CAP ? (
+          <Button asChild className="h-11 px-5">
+            <Link href="/children/new">Add a child</Link>
+          </Button>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Profile limit reached ({CHILD_PROFILE_CAP} children per account)
+          </p>
+        )}
       </div>
 
       {error ? (
