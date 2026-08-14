@@ -13,7 +13,7 @@ import type { ScriptVariant } from "@/lib/engine/session-script";
 import { SoundCapture } from "@/components/practice/sound-capture";
 import { Celebration } from "@/components/practice/celebration";
 import { GrowthMeter } from "@/components/growth-meter";
-import { PhaseIllustration, phaseIdentity } from "@/components/phase-identity";
+import { PhaseArt, phaseIdentity } from "@/components/phase-identity";
 
 /**
  * Session runtime. Executes the version-pinned RL behavior script locally:
@@ -334,7 +334,6 @@ export function SessionRunner({
   if (stage === "brief") {
     return (
       <div className="flex flex-col gap-4">
-        <PhaseIllustration phase={start!.phase_number} priority className="max-h-44 w-full" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{script.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -346,6 +345,8 @@ export function SessionRunner({
               : ""}
           </p>
         </div>
+
+        <PhaseArt phase={start!.phase_number} priority />
 
         {script.overview ? (
           <Card>
@@ -555,15 +556,13 @@ export function SessionRunner({
   return (
     <div className="flex flex-col gap-4">
       {graduated ? <Celebration /> : null}
-      {graduated ? (
-        <PhaseIllustration phase={r.advancedToPhaseNumber!} priority className="max-h-48 w-full" />
-      ) : null}
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">{graduated ? "A new phase begins!" : "Session complete"}</CardTitle>
           <CardDescription>{outcomeCopy}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {graduated ? <PhaseArt phase={r.advancedToPhaseNumber!} priority /> : null}
           {r.outcome === "advance" && !graduated ? (
             <GrowthMeter value={Math.min(r.consecutivePasses ?? 0, 3)} phase={start?.phase_number ?? 0} />
           ) : null}

@@ -39,21 +39,23 @@ export interface PhaseIdentity {
   cardAccent: string;
   /** Progress-bar fill. */
   bar: string;
+  /** Gradient stops for the illustration's colored mat (PhaseArt). */
+  frame: string;
 }
 
 const IDENTITIES: Record<number, PhaseIdentity> = {
-  1: { Icon: Eye, chip: "bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800", iconWrap: "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300", cardAccent: "border-amber-300/80 dark:border-amber-700/60", bar: "bg-amber-500" },
-  2: { Icon: Copy, chip: "bg-orange-100 text-orange-900 border-orange-200 dark:bg-orange-950/50 dark:text-orange-200 dark:border-orange-800", iconWrap: "bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300", cardAccent: "border-orange-300/80 dark:border-orange-700/60", bar: "bg-orange-500" },
-  3: { Icon: Wind, chip: "bg-lime-100 text-lime-900 border-lime-200 dark:bg-lime-950/50 dark:text-lime-200 dark:border-lime-800", iconWrap: "bg-lime-100 text-lime-700 dark:bg-lime-950/60 dark:text-lime-300", cardAccent: "border-lime-300/80 dark:border-lime-700/60", bar: "bg-lime-500" },
-  4: { Icon: ImageIcon, chip: "bg-teal-100 text-teal-900 border-teal-200 dark:bg-teal-950/50 dark:text-teal-200 dark:border-teal-800", iconWrap: "bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300", cardAccent: "border-teal-300/80 dark:border-teal-700/60", bar: "bg-teal-500" },
-  5: { Icon: Footprints, chip: "bg-cyan-100 text-cyan-900 border-cyan-200 dark:bg-cyan-950/50 dark:text-cyan-200 dark:border-cyan-800", iconWrap: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300", cardAccent: "border-cyan-300/80 dark:border-cyan-700/60", bar: "bg-cyan-500" },
-  6: { Icon: LayoutGrid, chip: "bg-sky-100 text-sky-900 border-sky-200 dark:bg-sky-950/50 dark:text-sky-200 dark:border-sky-800", iconWrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300", cardAccent: "border-sky-300/80 dark:border-sky-700/60", bar: "bg-sky-500" },
-  7: { Icon: MessageSquareText, chip: "bg-blue-100 text-blue-900 border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800", iconWrap: "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300", cardAccent: "border-blue-300/80 dark:border-blue-700/60", bar: "bg-blue-500" },
-  8: { Icon: MessageCircleQuestion, chip: "bg-indigo-100 text-indigo-900 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-200 dark:border-indigo-800", iconWrap: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300", cardAccent: "border-indigo-300/80 dark:border-indigo-700/60", bar: "bg-indigo-500" },
-  9: { Icon: MessageCircleHeart, chip: "bg-violet-100 text-violet-900 border-violet-200 dark:bg-violet-950/50 dark:text-violet-200 dark:border-violet-800", iconWrap: "bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300", cardAccent: "border-violet-300/80 dark:border-violet-700/60", bar: "bg-violet-500" },
-  10: { Icon: Users, chip: "bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200 dark:bg-fuchsia-950/50 dark:text-fuchsia-200 dark:border-fuchsia-800", iconWrap: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/60 dark:text-fuchsia-300", cardAccent: "border-fuchsia-300/80 dark:border-fuchsia-700/60", bar: "bg-fuchsia-500" },
-  11: { Icon: Home, chip: "bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800", iconWrap: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300", cardAccent: "border-emerald-300/80 dark:border-emerald-700/60", bar: "bg-emerald-500" },
-  12: { Icon: Mic, chip: "bg-rose-100 text-rose-900 border-rose-200 dark:bg-rose-950/50 dark:text-rose-200 dark:border-rose-800", iconWrap: "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300", cardAccent: "border-rose-300/80 dark:border-rose-700/60", bar: "bg-rose-500" },
+  1: { Icon: Eye, chip: "bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800", iconWrap: "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300", cardAccent: "border-amber-300/80 dark:border-amber-700/60", bar: "bg-amber-500", frame: "from-amber-200 to-orange-100 dark:from-amber-900/50 dark:to-orange-950/40" },
+  2: { Icon: Copy, chip: "bg-orange-100 text-orange-900 border-orange-200 dark:bg-orange-950/50 dark:text-orange-200 dark:border-orange-800", iconWrap: "bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300", cardAccent: "border-orange-300/80 dark:border-orange-700/60", bar: "bg-orange-500", frame: "from-orange-200 to-rose-100 dark:from-orange-900/50 dark:to-rose-950/40" },
+  3: { Icon: Wind, chip: "bg-lime-100 text-lime-900 border-lime-200 dark:bg-lime-950/50 dark:text-lime-200 dark:border-lime-800", iconWrap: "bg-lime-100 text-lime-700 dark:bg-lime-950/60 dark:text-lime-300", cardAccent: "border-lime-300/80 dark:border-lime-700/60", bar: "bg-lime-500", frame: "from-lime-200 to-emerald-100 dark:from-lime-900/50 dark:to-emerald-950/40" },
+  4: { Icon: ImageIcon, chip: "bg-teal-100 text-teal-900 border-teal-200 dark:bg-teal-950/50 dark:text-teal-200 dark:border-teal-800", iconWrap: "bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300", cardAccent: "border-teal-300/80 dark:border-teal-700/60", bar: "bg-teal-500", frame: "from-teal-200 to-cyan-100 dark:from-teal-900/50 dark:to-cyan-950/40" },
+  5: { Icon: Footprints, chip: "bg-cyan-100 text-cyan-900 border-cyan-200 dark:bg-cyan-950/50 dark:text-cyan-200 dark:border-cyan-800", iconWrap: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300", cardAccent: "border-cyan-300/80 dark:border-cyan-700/60", bar: "bg-cyan-500", frame: "from-cyan-200 to-sky-100 dark:from-cyan-900/50 dark:to-sky-950/40" },
+  6: { Icon: LayoutGrid, chip: "bg-sky-100 text-sky-900 border-sky-200 dark:bg-sky-950/50 dark:text-sky-200 dark:border-sky-800", iconWrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300", cardAccent: "border-sky-300/80 dark:border-sky-700/60", bar: "bg-sky-500", frame: "from-sky-200 to-blue-100 dark:from-sky-900/50 dark:to-blue-950/40" },
+  7: { Icon: MessageSquareText, chip: "bg-blue-100 text-blue-900 border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800", iconWrap: "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300", cardAccent: "border-blue-300/80 dark:border-blue-700/60", bar: "bg-blue-500", frame: "from-blue-200 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-950/40" },
+  8: { Icon: MessageCircleQuestion, chip: "bg-indigo-100 text-indigo-900 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-200 dark:border-indigo-800", iconWrap: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300", cardAccent: "border-indigo-300/80 dark:border-indigo-700/60", bar: "bg-indigo-500", frame: "from-indigo-200 to-violet-100 dark:from-indigo-900/50 dark:to-violet-950/40" },
+  9: { Icon: MessageCircleHeart, chip: "bg-violet-100 text-violet-900 border-violet-200 dark:bg-violet-950/50 dark:text-violet-200 dark:border-violet-800", iconWrap: "bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300", cardAccent: "border-violet-300/80 dark:border-violet-700/60", bar: "bg-violet-500", frame: "from-violet-200 to-fuchsia-100 dark:from-violet-900/50 dark:to-fuchsia-950/40" },
+  10: { Icon: Users, chip: "bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200 dark:bg-fuchsia-950/50 dark:text-fuchsia-200 dark:border-fuchsia-800", iconWrap: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/60 dark:text-fuchsia-300", cardAccent: "border-fuchsia-300/80 dark:border-fuchsia-700/60", bar: "bg-fuchsia-500", frame: "from-fuchsia-200 to-pink-100 dark:from-fuchsia-900/50 dark:to-pink-950/40" },
+  11: { Icon: Home, chip: "bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800", iconWrap: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300", cardAccent: "border-emerald-300/80 dark:border-emerald-700/60", bar: "bg-emerald-500", frame: "from-emerald-200 to-teal-100 dark:from-emerald-900/50 dark:to-teal-950/40" },
+  12: { Icon: Mic, chip: "bg-rose-100 text-rose-900 border-rose-200 dark:bg-rose-950/50 dark:text-rose-200 dark:border-rose-800", iconWrap: "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300", cardAccent: "border-rose-300/80 dark:border-rose-700/60", bar: "bg-rose-500", frame: "from-rose-200 to-pink-100 dark:from-rose-900/50 dark:to-pink-950/40" },
 };
 
 const FALLBACK: PhaseIdentity = {
@@ -62,6 +64,7 @@ const FALLBACK: PhaseIdentity = {
   iconWrap: "bg-muted text-muted-foreground",
   cardAccent: "border-border",
   bar: "bg-primary",
+  frame: "from-muted to-secondary",
 };
 
 export function phaseIdentity(phase: number | null | undefined): PhaseIdentity {
@@ -121,6 +124,40 @@ export function PhaseIllustration({
       priority={priority}
       className={cn("rounded-xl object-cover", className)}
     />
+  );
+}
+
+/**
+ * The full phase artwork, UNCUT (natural 3:2 aspect — no object-cover), sitting
+ * in a phase-colored gradient mat with a soft entrance. This is the standard
+ * presentation wherever a phase is introduced: session brief, Compass results,
+ * graduation. Sized by max-width so the whole image always shows.
+ */
+export function PhaseArt({
+  phase,
+  className,
+  priority = false,
+}: {
+  phase: number;
+  className?: string;
+  priority?: boolean;
+}) {
+  const src = phaseIllustrationSrc(phase);
+  if (!src) return null;
+  const id = phaseIdentity(phase);
+  return (
+    <div className={cn("animate-in fade-in slide-in-from-bottom-4 mx-auto w-full max-w-lg duration-700", className)}>
+      <div className={cn("rounded-3xl bg-gradient-to-br p-1.5 shadow-lg", id.frame)}>
+        <Image
+          src={src}
+          alt=""
+          width={800}
+          height={533}
+          priority={priority}
+          className="h-auto w-full rounded-[1.25rem]"
+        />
+      </div>
+    </div>
   );
 }
 

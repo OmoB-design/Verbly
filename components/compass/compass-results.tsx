@@ -10,7 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { PhaseChip, PhaseIllustration } from "@/components/phase-identity";
+import { PhaseArt, PhaseChip } from "@/components/phase-identity";
 import { PHASE_NAMES, phaseName } from "@/lib/compass/contract";
 import {
   domainLabel,
@@ -54,9 +54,9 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
         )}
       </div>
 
-      {/* The starting phase's illustration — the caregiver's first picture of
-          what they'll actually be doing (follows the override live). */}
-      <PhaseIllustration phase={startingPhase} priority className="max-h-52 w-full" />
+      {/* The starting phase's artwork — the caregiver's first picture of what
+          they'll actually be doing (follows the override live; never cropped). */}
+      <PhaseArt phase={startingPhase} priority />
 
       {/* Strengths FIRST (§11). */}
       <Card>
