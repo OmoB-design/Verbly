@@ -126,6 +126,12 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           ) : (
             <Badge variant="outline">Not started</Badge>
           )}
+          <Link
+            href={`/children/${id}/edit`}
+            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            Edit profile
+          </Link>
         </div>
         {child.dob ? (
           <p className="mt-1 text-sm text-muted-foreground">

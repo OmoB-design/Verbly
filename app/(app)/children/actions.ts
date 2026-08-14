@@ -61,3 +61,45 @@ export async function createChild(
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }
+
+/**
+ * Edit a child's profile (name, DOB). RLS's `children update own` policy is
+ * the enforcement — the update runs under the caller's own session, so a
+ * non-owner's update simply matches zero rows. Correcting a DOB deliberately
+ * does NOT rewrite history: the assigned age bracket and any Compass placement
+ * stay as assessed (versioned data is immutable against later edits); future
+ * computations (age display, Compass age checks, age floors) use the new DOB
+ * automatically.
+ */
+export async function updateChild(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const childId = String(formData.get("child_id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const dobRaw = String(formData.get("dob") ?? "").trim();
+
+  if (!childId) return { error: "Missing child id." };
+  if (!name) return { error: "Please enter the child's name." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: updated, error } = await supabase
+    .from("children")
+    .update({ name, dob: dobRaw || null })
+    .eq("id", childId)
+    .select("id")
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!updated) return { error: "Child not found or not yours to edit." };
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/children/${childId}`);
+  redirect(`/children/${childId}`);
+}
