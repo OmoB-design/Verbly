@@ -11,6 +11,7 @@ import { calculateProgressionState } from "@/lib/engine/progression";
 import { ReadinessCheck } from "@/components/readiness/readiness-check";
 import { PhaseIconBubble, PhaseSticker, phaseIdentity } from "@/components/phase-identity";
 import { GrowthMeter } from "@/components/growth-meter";
+import { twoAdultCopy } from "@/lib/compass/ui-copy";
 import type { ReadinessContent } from "@/content/readiness/readiness-checks";
 
 /**
@@ -29,7 +30,7 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
 
   const { data: child } = await supabase
     .from("children")
-    .select("id, name, current_phase_id, age_bracket")
+    .select("id, name, current_phase_id, age_bracket, second_adult_available")
     .eq("id", id)
     .maybeSingle();
   if (!child) notFound();
@@ -309,6 +310,13 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
             </p>
           </CardContent>
         </Card>
+      ) : null}
+
+      {/* §6.7 two-adult advisory, re-evaluated LIVE from the child's current
+          second-adult setting (updatable in settings) — not the frozen
+          assessment value. Phases 4–5 only. */}
+      {phase && (phase.phase_number === 4 || phase.phase_number === 5) && child.second_adult_available === "no" ? (
+        <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-foreground/80">{twoAdultCopy()}</p>
       ) : null}
 
       {readinessKeepAnEye ? (

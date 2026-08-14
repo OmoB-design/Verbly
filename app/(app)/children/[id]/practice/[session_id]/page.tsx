@@ -30,6 +30,13 @@ export default async function RunSessionPage({
   // "Caregiver B".
   const { data: caregiver } = await supabase.from("caregivers").select("full_name").eq("id", user.id).maybeSingle();
 
+  // Saved helper roster (settings) — quick-pick in the runner's setup step.
+  const { data: roster } = await supabase
+    .from("saved_participants")
+    .select("display_name, role")
+    .eq("child_id", id)
+    .order("created_at", { ascending: true });
+
   return (
     <div className="flex flex-col gap-2">
       <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2 self-start">
@@ -40,6 +47,7 @@ export default async function RunSessionPage({
         childName={child.name}
         sessionId={session_id}
         caregiverName={caregiver?.full_name ?? null}
+        savedHelpers={(roster ?? []).map((r) => ({ name: r.display_name, role: r.role }))}
       />
     </div>
   );

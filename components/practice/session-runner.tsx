@@ -55,11 +55,14 @@ export function SessionRunner({
   childName,
   sessionId,
   caregiverName,
+  savedHelpers = [],
 }: {
   childId: string;
   childName: string;
   sessionId: string;
   caregiverName?: string | null;
+  /** Saved roster from settings — quick-pick, so names aren't retyped. */
+  savedHelpers?: { name: string; role: string }[];
 }) {
   const supabase = React.useMemo(() => createClient(), []);
 
@@ -270,6 +273,28 @@ export function SessionRunner({
 
           {helperPresent ? (
             <div className="flex flex-col gap-3 rounded-lg border p-4">
+              {savedHelpers.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {savedHelpers.map((h) => (
+                    <button
+                      key={`${h.name}-${h.role}`}
+                      type="button"
+                      onClick={() => {
+                        setHelperName(h.name);
+                        setHelperRole(h.role === "peer" ? "peer" : "secondary");
+                      }}
+                      className={
+                        "rounded-full border px-3 py-1.5 text-sm transition-colors " +
+                        (helperName === h.name
+                          ? "border-primary bg-primary/5 ring-primary/30 ring-1"
+                          : "border-input hover:bg-muted/50")
+                      }
+                    >
+                      {h.name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <div className="grid grid-cols-2 gap-3">
                 <ChoiceButton selected={helperRole === "secondary"} onClick={() => setHelperRole("secondary")}>
                   An adult helper

@@ -90,9 +90,23 @@ export async function updateChild(
     redirect("/login");
   }
 
+  // Settings additions (owner spec 2026-08-14): languages are descriptive
+  // context; second_adult_available feeds the Phase 4/5 two-adult advisory,
+  // which re-evaluates live from this field wherever it's shown.
+  const primaryLanguage = String(formData.get("primary_language") ?? "").trim();
+  const additionalLanguages = String(formData.get("additional_languages") ?? "").trim();
+  const secondAdultRaw = String(formData.get("second_adult_available") ?? "");
+  const secondAdult = ["usually", "sometimes", "no"].includes(secondAdultRaw) ? secondAdultRaw : null;
+
   const { data: updated, error } = await supabase
     .from("children")
-    .update({ name, dob: dobRaw || null })
+    .update({
+      name,
+      dob: dobRaw || null,
+      primary_language: primaryLanguage || null,
+      additional_languages: additionalLanguages || null,
+      ...(secondAdult ? { second_adult_available: secondAdult } : {}),
+    })
     .eq("id", childId)
     .select("id")
     .maybeSingle();
@@ -102,4 +116,38 @@ export async function updateChild(
   revalidatePath("/dashboard");
   revalidatePath(`/children/${childId}`);
   redirect(`/children/${childId}`);
+}
+
+/** Add a helper to the child's saved roster (RLS enforces child ownership). */
+export async function addParticipant(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const childId = String(formData.get("child_id") ?? "");
+  const displayName = String(formData.get("display_name") ?? "").trim();
+  const role = String(formData.get("role") ?? "");
+  if (!childId || !displayName) return { error: "Please enter a name." };
+  if (!["communication_partner", "physical_prompter", "peer"].includes(role)) {
+    return { error: "Please choose a role." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("saved_participants")
+    .insert({ child_id: childId, display_name: displayName, role });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/children/${childId}/edit`);
+  return undefined;
+}
+
+/** Remove a helper from the roster. */
+export async function removeParticipant(formData: FormData) {
+  const id = String(formData.get("participant_id") ?? "");
+  const childId = String(formData.get("child_id") ?? "");
+  if (!id) return;
+
+  const supabase = await createClient();
+  await supabase.from("saved_participants").delete().eq("id", id);
+  revalidatePath(`/children/${childId}/edit`);
 }
