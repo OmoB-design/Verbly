@@ -13,6 +13,7 @@ import { SCORED_DOMAINS, type DomainScores } from "@/lib/compass/types";
 import { phaseName } from "@/lib/compass/contract";
 import { VocalPlayback } from "@/components/slp/vocal-playback";
 import { NoteComposer } from "@/components/slp/note-composer";
+import { PhaseChip } from "@/components/phase-identity";
 
 /**
  * SLP clinical view — read-only, RLS-scoped (every query returns rows only
@@ -70,9 +71,7 @@ export default async function SlpChildPage({
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">{child.name}</h1>
           {currentPhase ? (
-            <Badge variant="secondary">
-              Phase {currentPhase.phase_number} — {currentPhase.name}
-            </Badge>
+            <PhaseChip phase={currentPhase.phase_number} name={currentPhase.name} />
           ) : (
             <Badge variant="outline">Not placed yet</Badge>
           )}
@@ -363,16 +362,21 @@ async function ProgressionTab({ childId }: { childId: string }) {
             <p className="text-sm text-muted-foreground">No phase transitions recorded yet.</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {(history ?? []).map((h) => (
-                <li key={h.id} className="flex items-center justify-between gap-3 text-sm">
-                  <span>
-                    Phase {phaseNumById.get(h.phase_id) ?? "—"}
-                    {h.age_bracket ? ` · bracket ${h.age_bracket}` : ""}
-                    <span className="block text-xs text-muted-foreground">{formatDate(h.entered_at)}</span>
-                  </span>
-                  <Badge variant="outline">{triggerReasonLabel(h.trigger_reason)}</Badge>
-                </li>
-              ))}
+              {(history ?? []).map((h) => {
+                const n = phaseNumById.get(h.phase_id);
+                return (
+                  <li key={h.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="flex items-center gap-2">
+                      {n !== undefined ? <PhaseChip phase={n} /> : <span>Phase —</span>}
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(h.entered_at)}
+                        {h.age_bracket ? ` · bracket ${h.age_bracket}` : ""}
+                      </span>
+                    </span>
+                    <Badge variant="outline">{triggerReasonLabel(h.trigger_reason)}</Badge>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>

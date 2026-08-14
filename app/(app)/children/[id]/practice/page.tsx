@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { PASS_MARK, REQUIRED_CONSECUTIVE_PASSES, nextRetakeSessionId } from "@/lib/engine/advancement";
+import { calculateProgressionState } from "@/lib/engine/progression";
 import { ReadinessCheck } from "@/components/readiness/readiness-check";
 import { PhaseIconBubble, PhaseIllustration, phaseIdentity } from "@/components/phase-identity";
 import { GrowthMeter } from "@/components/growth-meter";
@@ -89,16 +90,30 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
     .order("completed_at", { ascending: true });
 
   // ── Phase goal + progress (owner feedback: the caregiver must always know
-  // the target and what happens next). Mirrors /sessions/complete exactly:
-  // trailing run of passes (≥ PASS_MARK) across ALL completed attempts in this
-  // phase, any variant. 3 in a row → the next phase.
-  const phaseSessionIds = new Set((allSessions ?? []).map((s) => s.id));
-  const phaseAttempts = (attempts ?? []).filter((a) => phaseSessionIds.has(a.session_id));
-  let consecutivePasses = 0;
-  for (let i = phaseAttempts.length - 1; i >= 0; i--) {
-    if (Number(phaseAttempts[i].score_percent ?? 0) >= PASS_MARK) consecutivePasses++;
-    else break;
-  }
+  // the target and what happens next).
+  //
+  // This does NOT recompute the rule — it calls the same authoritative function
+  // /api/sessions/complete uses (lib/engine/progression.ts), so the screen and
+  // the server cannot report different runs.
+  //
+  // Phase membership is resolved by phase_number rather than by the card list's
+  // phase_id: `curriculum_content.phases` is versioned, so attempts recorded
+  // under an earlier content version of this phase must still count. This is
+  // also how /api/sessions/start scopes the phase.
+  const { data: phaseNumberSessions } = phase
+    ? await supabase
+        .schema("curriculum_content")
+        .from("sessions")
+        .select("id")
+        .eq("phase_number", phase.phase_number)
+    : { data: null };
+
+  const progression = calculateProgressionState({
+    attempts: attempts ?? [],
+    phaseSessionIds: (phaseNumberSessions ?? []).map((s) => s.id as string),
+  });
+  const { consecutivePasses, graduationAwaitingStandardPass } = progression;
+  const phaseAttempts = progression.inPhaseAttempts;
   const { data: nextPhase } = phase
     ? await supabase
         .schema("curriculum_content")
@@ -280,9 +295,16 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
               {consecutivePasses === 0
                 ? `No passing sessions in a row yet — the "Start here" activity below is the place to begin.`
                 : `${Math.min(consecutivePasses, REQUIRED_CONSECUTIVE_PASSES)} of ${REQUIRED_CONSECUTIVE_PASSES} passing sessions in a row — ${
-                    consecutivePasses >= REQUIRED_CONSECUTIVE_PASSES - 1 && nextPhase
-                      ? `one more and ${child.name} moves to Phase ${nextPhase.phase_number}!`
-                      : "keep going!"
+                    // A run completed by a Simplified pass holds: the graduating
+                    // pass must be a standard session, so say which one counts
+                    // rather than promising a move that will not happen.
+                    graduationAwaitingStandardPass
+                      ? nextPhase
+                        ? `one more full session (not a Simplified one) and ${child.name} moves to Phase ${nextPhase.phase_number}!`
+                        : "one more full session (not a Simplified one) to finish the programme!"
+                      : consecutivePasses >= REQUIRED_CONSECUTIVE_PASSES - 1 && nextPhase
+                        ? `one more and ${child.name} moves to Phase ${nextPhase.phase_number}!`
+                        : "keep going!"
                   }`}
             </p>
           </CardContent>

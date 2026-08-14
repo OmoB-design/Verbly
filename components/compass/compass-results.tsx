@@ -4,11 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { Sparkles, Telescope } from "lucide-react";
+
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { PhaseChip, PhaseIllustration } from "@/components/phase-identity";
 import { PHASE_NAMES, phaseName } from "@/lib/compass/contract";
 import {
   domainLabel,
@@ -52,19 +54,26 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
         )}
       </div>
 
+      {/* The starting phase's illustration — the caregiver's first picture of
+          what they'll actually be doing (follows the override live). */}
+      <PhaseIllustration phase={startingPhase} priority className="max-h-52 w-full" />
+
       {/* Strengths FIRST (§11). */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">What&apos;s already working</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="size-5 text-amber-500" aria-hidden />
+            What&apos;s already working
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {result.strengths.length > 0 ? (
             <ul className="flex flex-wrap gap-2">
               {result.strengths.map((s) => (
                 <li key={s}>
-                  <Badge variant="secondary" className="text-sm font-normal">
+                  <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
                     {domainLabel(s)}
-                  </Badge>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -79,7 +88,10 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
       {/* How we'll begin. */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">How we&apos;ll begin</CardTitle>
+          <CardTitle className="flex flex-wrap items-center gap-2 text-lg">
+            How we&apos;ll begin
+            <PhaseChip phase={startingPhase} />
+          </CardTitle>
           <CardDescription>{placementModeCopy(result.placement_mode, childName)}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
@@ -97,15 +109,18 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
       {result.needs.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">What we&apos;ll focus on next</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Telescope className="size-5 text-sky-500" aria-hidden />
+              What we&apos;ll focus on next
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="flex flex-wrap gap-2">
               {result.needs.map((n) => (
                 <li key={n}>
-                  <Badge variant="outline" className="text-sm font-normal">
+                  <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-sm text-sky-900 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
                     {domainLabel(n)}
-                  </Badge>
+                  </span>
                 </li>
               ))}
             </ul>

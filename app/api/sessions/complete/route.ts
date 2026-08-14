@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { PASS_MARK, decideAdvancement } from "@/lib/engine/advancement";
+import { decideAdvancement } from "@/lib/engine/advancement";
+import { calculateProgressionState } from "@/lib/engine/progression";
 import {
   scoreSessionPercent,
   rollingBaselineStep,
@@ -128,7 +129,7 @@ export async function POST(request: Request) {
   // 3. Assemble history for the decision.
   const { data: history, error: histErr } = await admin
     .from("session_instances")
-    .select("id, session_id, score_percent, completed_at")
+    .select("id, session_id, score_percent, completed_at, ran_simplified")
     .eq("child_id", instance.child_id)
     .not("completed_at", "is", null)
     .order("completed_at", { ascending: true });
@@ -147,26 +148,25 @@ export async function POST(request: Request) {
     for (const s of sess ?? []) phaseBySession.set(s.id, s.phase_number);
   }
 
-  // Consecutive passing attempts within the current phase, immediately before
-  // this attempt (trailing run of passes over completed instances in-phase).
-  const inPhase = completed.filter(
-    (r) => phaseBySession.get(r.session_id) === currentPhaseNumber,
-  );
-  let priorConsecutivePasses = 0;
-  for (let i = inPhase.length - 1; i >= 0; i--) {
-    if ((inPhase[i].score_percent ?? 0) >= PASS_MARK) priorConsecutivePasses++;
-    else break;
-  }
+  // The ONE authoritative reading of where this child stands in the phase —
+  // the same function the practice page renders from, so the screen and this
+  // decision cannot disagree (lib/engine/progression.ts). Phase membership is
+  // keyed by phase_number, not phase_id, so attempts recorded under an earlier
+  // content version of the same phase still count.
+  const phaseSessionIds = [...phaseBySession.entries()]
+    .filter(([, phaseNumber]) => phaseNumber === currentPhaseNumber)
+    .map(([sessionId]) => sessionId);
 
-  // Prior failed attempts at THIS same curriculum session.
-  const priorFailedAttemptsThisSession = completed.filter(
-    (r) => r.session_id === instance.session_id && (r.score_percent ?? 0) < PASS_MARK,
-  ).length;
+  const progression = calculateProgressionState({
+    attempts: completed,
+    phaseSessionIds,
+    sessionId: instance.session_id,
+  });
 
   const decision = decideAdvancement({
     score,
-    priorConsecutivePasses,
-    priorFailedAttemptsThisSession,
+    priorConsecutivePasses: progression.consecutivePasses,
+    priorFailedAttemptsThisSession: progression.priorFailedAttemptsThisSession,
     // Owner ruling 2026-08-09: a simplified pass counts in the run but cannot
     // be the graduating pass.
     ranSimplified: instance.ran_simplified === true,

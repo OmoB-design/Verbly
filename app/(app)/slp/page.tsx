@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
 import { formatAge, formatDate } from "@/lib/format";
+import { PhaseChip } from "@/components/phase-identity";
 
 /**
  * SLP caseload. Every query here rides RLS — an SLP's client only returns the
@@ -126,7 +127,14 @@ export default async function SlpCaseloadPage() {
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{child.dob ? formatAge(child.dob) : "—"}</TableCell>
                       <TableCell className="whitespace-nowrap">
-                        {phase ? `Phase ${phase.phase_number} — ${phase.name}` : "Not placed yet"}
+                        {phase ? (
+                          <span className="inline-flex items-center gap-2">
+                            <PhaseChip phase={phase.phase_number} />
+                            <span className="hidden text-xs text-muted-foreground lg:inline">{phase.name}</span>
+                          </span>
+                        ) : (
+                          "Not placed yet"
+                        )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {lastSession?.completed_at
