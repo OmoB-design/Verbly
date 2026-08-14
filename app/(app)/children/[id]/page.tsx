@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatAge, formatDate, outcomeLabel, triggerReasonLabel } from "@/lib/format";
 import { SlpShareCard } from "@/components/slp/share-card";
+import { RegressControl } from "@/components/children/regress-control";
+import { VocalPlayback } from "@/components/slp/vocal-playback";
 
 export default async function ChildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -73,6 +75,15 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
     .eq("child_id", id)
     .order("created_at", { ascending: false })
     .limit(10);
+
+  // Sounds captured in sessions — the caregiver's own record (playback via
+  // the same signed-URL route the SLP view uses).
+  const { data: vocalLogs } = await supabase
+    .from("vocalization_logs")
+    .select("id, sound_produced, spontaneity, storage_path, recorded_at")
+    .eq("child_id", id)
+    .order("recorded_at", { ascending: false })
+    .limit(8);
   const noteAuthor = new Map(linkedSlps.map((s) => [s.id, s.name]));
 
   // Phase history (the single audit trail), newest first.
@@ -93,14 +104,42 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
   // Resolve phase numbers (for history) and session numbers (for sessions).
   const historyPhaseIds = [...new Set((history ?? []).map((h) => h.phase_id))];
   const phaseNumById = new Map<string, number>();
+  const phaseNameById = new Map<string, string>();
   if (historyPhaseIds.length > 0) {
     const { data } = await supabase
       .schema("curriculum_content")
       .from("phases")
-      .select("id, phase_number")
+      .select("id, phase_number, name")
       .in("id", historyPhaseIds);
-    for (const p of data ?? []) phaseNumById.set(p.id, p.phase_number);
+    for (const p of data ?? []) {
+      phaseNumById.set(p.id, p.phase_number);
+      phaseNameById.set(p.id, p.name);
+    }
   }
+
+  // Earlier phases this child has actually REACHED (the regress endpoint
+  // enforces the same rule server-side) — offered as move-back targets.
+  const currentPhaseNumber = currentPhase?.phase_number ?? null;
+  const regressOptions =
+    currentPhaseNumber !== null
+      ? [
+          ...new Map(
+            (history ?? [])
+              .filter((h) => {
+                const n = phaseNumById.get(h.phase_id);
+                return n !== undefined && n < currentPhaseNumber;
+              })
+              .map((h) => [
+                phaseNumById.get(h.phase_id)!,
+                {
+                  phaseId: h.phase_id,
+                  phaseNumber: phaseNumById.get(h.phase_id)!,
+                  name: phaseNameById.get(h.phase_id) ?? `Phase ${phaseNumById.get(h.phase_id)}`,
+                },
+              ]),
+          ).values(),
+        ].sort((a, b) => b.phaseNumber - a.phaseNumber)
+      : [];
   const sessionIds = [...new Set((sessions ?? []).map((s) => s.session_id))];
   const sessionMeta = new Map<string, { phase_number: number; session_number: number }>();
   if (sessionIds.length > 0) {
@@ -119,19 +158,18 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
         <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2">
           <Link href="/dashboard">← All children</Link>
         </Button>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{child.name}</h1>
-          {currentPhase ? (
-            <Badge variant="secondary">Phase {currentPhase.phase_number}</Badge>
-          ) : (
-            <Badge variant="outline">Not started</Badge>
-          )}
-          <Link
-            href={`/children/${id}/edit`}
-            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-          >
-            Edit profile
-          </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight">{child.name}</h1>
+            {currentPhase ? (
+              <Badge variant="secondary">Phase {currentPhase.phase_number}</Badge>
+            ) : (
+              <Badge variant="outline">Not started</Badge>
+            )}
+          </div>
+          <Button asChild>
+            <Link href={`/children/${id}/edit`}>Edit profile</Link>
+          </Button>
         </div>
         {child.dob ? (
           <p className="mt-1 text-sm text-muted-foreground">
@@ -154,17 +192,20 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
         {currentPhase?.clinical_goal ? (
           <CardContent className="text-sm text-muted-foreground">{currentPhase.clinical_goal}</CardContent>
         ) : null}
-        <CardContent className="flex flex-wrap gap-2">
-          {currentPhase ? (
-            <Button asChild size="sm">
-              <Link href={`/children/${id}/practice`}>Practice</Link>
+        <CardContent className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            {currentPhase ? (
+              <Button asChild size="sm">
+                <Link href={`/children/${id}/practice`}>Practice</Link>
+              </Button>
+            ) : null}
+            <Button asChild variant={hasCompass ? "outline" : "default"} size="sm">
+              <Link href={`/children/${id}/compass`}>
+                {hasCompass ? "View Compass results" : "Start the Communication Compass"}
+              </Link>
             </Button>
-          ) : null}
-          <Button asChild variant={hasCompass ? "outline" : "default"} size="sm">
-            <Link href={`/children/${id}/compass`}>
-              {hasCompass ? "View Compass results" : "Start the Communication Compass"}
-            </Link>
-          </Button>
+          </div>
+          <RegressControl childId={id} childName={child.name} options={regressOptions} />
         </CardContent>
       </Card>
 
@@ -221,6 +262,30 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           )}
         </CardContent>
       </Card>
+
+      {(vocalLogs ?? []).length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Sounds you&apos;ve captured</CardTitle>
+            <CardDescription>Vocalizations noted during sessions — with recordings where you made one.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y">
+              {(vocalLogs ?? []).map((v) => (
+                <li key={v.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="text-sm">
+                    <span className="font-medium">&ldquo;{v.sound_produced ?? "—"}&rdquo;</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {v.spontaneity === "imitated" ? "copying you" : "on their own"} · {formatDate(v.recorded_at)}
+                    </span>
+                  </div>
+                  {v.storage_path ? <VocalPlayback logId={v.id} /> : null}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

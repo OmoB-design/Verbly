@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -72,4 +73,51 @@ export async function signup(
   // exists; otherwise they're signed in immediately.
   revalidatePath("/", "layout");
   redirect(safeNext(formData));
+}
+
+/**
+ * Request a password-reset email. Always answers the same way whether or not
+ * the address has an account (no account enumeration); the one error surfaced
+ * is Supabase's mailer rate limit, since silence there would gaslight the
+ * user. The link routes through /auth/confirm (type=recovery) → /reset-password.
+ */
+export async function requestPasswordReset(
+  _prevState: { error?: string; sent?: boolean } | undefined,
+  formData: FormData,
+): Promise<{ error?: string; sent?: boolean } | undefined> {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email.includes("@")) return { error: "Please enter your email address." };
+
+  const h = await headers();
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? h.get("origin") ?? "http://localhost:3001";
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+  });
+  if (error && /rate limit/i.test(error.message)) {
+    return { error: "Too many reset emails just now — please wait a little while and try again." };
+  }
+  return { sent: true };
+}
+
+/** Set a new password (the user arrives holding the recovery session). */
+export async function updatePassword(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
 }

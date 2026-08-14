@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Modal } from "@/components/ui/modal";
 
 /**
  * Edit profile + the danger zone. Deleting is the one truly irreversible act
@@ -114,43 +115,53 @@ function DeleteChildCard({ childId, childName }: { childId: string; childName: s
           and voice recordings. This cannot be undone.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {!open ? (
-          <div>
-            <Button variant="outline" className="border-destructive/50 text-destructive hover:bg-destructive/10" onClick={() => setOpen(true)}>
-              Delete {childName}&apos;s profile…
+      <CardContent>
+        <Button
+          variant="outline"
+          className="border-destructive/50 text-destructive hover:bg-destructive/10"
+          onClick={() => setOpen(true)}
+        >
+          Delete {childName}&apos;s profile…
+        </Button>
+
+        <Modal
+          open={open}
+          onClose={() => {
+            setOpen(false);
+            setTyped("");
+            setError(null);
+          }}
+          locked={busy}
+          title={`Delete ${childName}'s profile?`}
+          description="This permanently removes the profile and everything in it — sessions, assessment results, SLP notes, and voice recordings. It cannot be undone."
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="confirm-name" className="text-sm">
+              Type <span className="font-semibold">{childName}</span> to confirm
+            </Label>
+            <Input
+              id="confirm-name"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={childName}
+              className="h-11"
+            />
+          </div>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10"
+              disabled={typed.trim() !== childName || busy}
+              onClick={destroy}
+            >
+              {busy ? "Deleting…" : "Permanently delete"}
+            </Button>
+            <Button variant="ghost" onClick={() => { setOpen(false); setTyped(""); }} disabled={busy}>
+              Cancel
             </Button>
           </div>
-        ) : (
-          <>
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-name" className="text-sm">
-                Type <span className="font-semibold">{childName}</span> to confirm
-              </Label>
-              <Input
-                id="confirm-name"
-                value={typed}
-                onChange={(e) => setTyped(e.target.value)}
-                placeholder={childName}
-                className="h-11"
-              />
-            </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="border-destructive/50 text-destructive hover:bg-destructive/10"
-                disabled={typed.trim() !== childName || busy}
-                onClick={destroy}
-              >
-                {busy ? "Deleting…" : "Permanently delete"}
-              </Button>
-              <Button variant="ghost" onClick={() => { setOpen(false); setTyped(""); }} disabled={busy}>
-                Cancel
-              </Button>
-            </div>
-          </>
-        )}
+        </Modal>
       </CardContent>
     </Card>
   );

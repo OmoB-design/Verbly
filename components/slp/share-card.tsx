@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 
 /**
  * "Share with your SLP" — the caregiver's access-control surface (invite links
@@ -43,6 +44,7 @@ export function SlpShareCard({
   const [emailFor, setEmailFor] = React.useState<string | null>(null); // invite id
   const [email, setEmail] = React.useState("");
   const [emailStatus, setEmailStatus] = React.useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = React.useState<LinkedSlp | null>(null);
 
   const inviteUrl = (token: string) =>
     (typeof window !== "undefined" ? window.location.origin : "") + `/invite/${token}`;
@@ -129,8 +131,8 @@ export function SlpShareCard({
                   <span className="font-medium">{s.name}</span>
                   <span className="block text-xs text-muted-foreground">has access to {childName}&apos;s records</span>
                 </span>
-                <Button variant="outline" size="sm" onClick={() => revoke({ slp_id: s.id })} disabled={busy === s.id}>
-                  {busy === s.id ? "Removing…" : "Remove access"}
+                <Button variant="outline" size="sm" onClick={() => setConfirmRemove(s)} disabled={busy === s.id}>
+                  Remove access
                 </Button>
               </li>
             ))}
@@ -191,6 +193,32 @@ export function SlpShareCard({
             {busy === "create" ? "Creating…" : "Create an invite link"}
           </Button>
         </div>
+
+        <Modal
+          open={confirmRemove !== null}
+          onClose={() => busy === null && setConfirmRemove(null)}
+          locked={busy !== null}
+          title={`Remove ${confirmRemove?.name ?? "this SLP"}'s access?`}
+          description={`They'll immediately stop seeing ${childName}'s records and can no longer leave notes. Notes they've already written stay on ${childName}'s record. You can always invite them again later.`}
+        >
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10"
+              disabled={busy !== null}
+              onClick={async () => {
+                if (!confirmRemove) return;
+                await revoke({ slp_id: confirmRemove.id });
+                setConfirmRemove(null);
+              }}
+            >
+              {busy !== null ? "Removing…" : "Remove access"}
+            </Button>
+            <Button variant="ghost" onClick={() => setConfirmRemove(null)} disabled={busy !== null}>
+              Cancel
+            </Button>
+          </div>
+        </Modal>
       </CardContent>
     </Card>
   );

@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
   // would be wrong for API clients and breaks the secret-authed cron route.
   // /invite is public: an SLP opening a caregiver's invite link may have no
   // account yet — the page itself walks them to signup/login and back.
-  const publicPaths = ["/", "/login", "/signup", "/auth", "/invite"];
+  const publicPaths = ["/", "/login", "/signup", "/auth", "/invite", "/forgot-password"];
   const { pathname } = request.nextUrl;
   const isApi = pathname.startsWith("/api");
   const isPublic = publicPaths.some(

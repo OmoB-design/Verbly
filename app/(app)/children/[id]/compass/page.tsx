@@ -8,8 +8,15 @@ import { AssessmentFlow } from "@/components/compass/assessment-flow";
 import { CompassResults } from "@/components/compass/compass-results";
 import type { CompassResult } from "@/lib/compass/types";
 
-export default async function CompassPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CompassPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ retake?: string }>;
+}) {
   const { id } = await params;
+  const retake = (await searchParams).retake === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,7 +26,10 @@ export default async function CompassPage({ params }: { params: Promise<{ id: st
   const { data: child } = await supabase.from("children").select("id, name, dob").eq("id", id).maybeSingle();
   if (!child) notFound();
 
-  // Already completed? Surface the stored result (RLS-scoped to this caregiver).
+  // Already completed? Surface the stored result (RLS-scoped to this
+  // caregiver) — unless the caregiver explicitly chose to retake (?retake=1,
+  // confirmed via modal on the results screen): then run a fresh assessment
+  // (the /start endpoint creates a new in-progress row once one is scored).
   const { data: scored } = await supabase
     .from("assessments")
     .select("id, raw_payload, starting_phase, placement_source")
@@ -35,7 +45,7 @@ export default async function CompassPage({ params }: { params: Promise<{ id: st
     </Button>
   );
 
-  if (scored?.raw_payload) {
+  if (scored?.raw_payload && !retake) {
     const result = {
       ...(scored.raw_payload as CompassResult),
       starting_phase: scored.starting_phase,

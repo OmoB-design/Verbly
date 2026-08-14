@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -146,7 +148,42 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
           onOverridden?.();
         }}
       />
+
+      <RetakeControl childId={childId} childName={childName} />
     </div>
+  );
+}
+
+/** Re-assessment entry (the /start endpoint always supported it — this is its
+ *  first UI). A fresh Compass re-places the child, so it gets a modal that
+ *  says exactly that before anything starts. */
+function RetakeControl({ childId, childName }: { childId: string; childName: string }) {
+  const router = useRouter();
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="self-start text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        Things have changed — retake the assessment
+      </button>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Retake the Communication Compass?"
+        description={`A fresh assessment looks at how ${childName} communicates now, and its result becomes the new starting point — the current placement and history stay on record. It takes about ten minutes.`}
+      >
+        <div className="flex gap-2">
+          <Button onClick={() => router.push(`/children/${childId}/compass?retake=1`)}>Start the reassessment</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Not now
+          </Button>
+        </div>
+      </Modal>
+    </>
   );
 }
 

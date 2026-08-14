@@ -56,6 +56,13 @@ function LoginForm() {
         <Button type="submit" disabled={pending}>
           {pending ? "Logging in…" : "Log in"}
         </Button>
+
+        <Link
+          href="/forgot-password"
+          className="self-start text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          Forgot your password?
+        </Link>
       </form>
 
       <p className="text-sm text-muted-foreground">
