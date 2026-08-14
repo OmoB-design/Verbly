@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { PASS_MARK, REQUIRED_CONSECUTIVE_PASSES, nextRetakeSessionId } from "@/lib/engine/advancement";
 import { ReadinessCheck } from "@/components/readiness/readiness-check";
+import { PhaseIconBubble, phaseIdentity } from "@/components/phase-identity";
 import type { ReadinessContent } from "@/content/readiness/readiness-checks";
 
 /**
@@ -248,14 +250,17 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
         {backLink}
         <h1 className="text-2xl font-semibold tracking-tight">Practice with {child.name}</h1>
         {phase ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Phase {phase.phase_number} — {phase.name}
+          <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+            <PhaseIconBubble phase={phase.phase_number} />
+            <span>
+              Phase {phase.phase_number} — {phase.name}
+            </span>
           </p>
         ) : null}
       </div>
 
       {phase ? (
-        <Card className="border-primary/30">
+        <Card className={cn("border-2", phaseIdentity(phase.phase_number).cardAccent)}>
           <CardHeader>
             <CardTitle className="text-base">The goal for this phase</CardTitle>
             <CardDescription>
@@ -268,6 +273,7 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
             <Progress
               value={(Math.min(consecutivePasses, REQUIRED_CONSECUTIVE_PASSES) / REQUIRED_CONSECUTIVE_PASSES) * 100}
               label="Progress toward the next phase"
+              indicatorClassName={phaseIdentity(phase.phase_number).bar}
             />
             <p className="text-xs text-muted-foreground">
               {consecutivePasses === 0
@@ -347,7 +353,11 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
             const recommended = n === recommendedGroup;
             return (
               <li key={n}>
-                <Card className={recommended ? "border-primary/50" : undefined}>
+                <Card
+                  className={
+                    recommended && phase ? cn("border-2", phaseIdentity(phase.phase_number).cardAccent) : undefined
+                  }
+                >
                   <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">

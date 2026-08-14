@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { formatAge, formatDate } from "@/lib/format";
 import { CHILD_PROFILE_CAP } from "@/lib/limits";
+import { PhaseChip, PhaseIconBubble } from "@/components/phase-identity";
 
 /**
  * Caregiver home. Lists the caregiver's children (RLS-scoped — no app-side
@@ -71,17 +72,26 @@ export default async function DashboardPage() {
                   href={`/children/${child.id}`}
                   className="block rounded-xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
-                  <Card className="transition-colors hover:bg-accent/40">
-                    <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
-                      <CardTitle className="text-lg">{child.name}</CardTitle>
+                  <Card className="h-full transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <CardHeader className="flex-row items-center gap-3 space-y-0">
                       {phase ? (
-                        <Badge variant="secondary">Phase {phase.phase_number}</Badge>
+                        <PhaseIconBubble phase={phase.phase_number} size="lg" />
                       ) : (
-                        <Badge variant="outline">Not started</Badge>
+                        <span className="bg-secondary text-secondary-foreground inline-flex size-11 shrink-0 items-center justify-center rounded-full text-lg font-semibold" aria-hidden>
+                          {child.name.charAt(0).toUpperCase()}
+                        </span>
                       )}
+                      <div className="min-w-0">
+                        <CardTitle className="text-lg">{child.name}</CardTitle>
+                        {phase ? (
+                          <PhaseChip phase={phase.phase_number} className="mt-1" />
+                        ) : (
+                          <Badge variant="outline" className="mt-1">Ready to begin</Badge>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground">
-                      {phase ? phase.name : "No phase yet"}
+                      {phase ? phase.name : "Start with the Communication Compass"}
                       {child.dob ? (
                         <span className="block">
                           Age: {formatAge(child.dob)} · Born {formatDate(child.dob)}

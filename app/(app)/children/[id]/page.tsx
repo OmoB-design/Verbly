@@ -10,6 +10,7 @@ import { formatAge, formatDate, outcomeLabel, triggerReasonLabel } from "@/lib/f
 import { SlpShareCard } from "@/components/slp/share-card";
 import { RegressControl } from "@/components/children/regress-control";
 import { VocalPlayback } from "@/components/slp/vocal-playback";
+import { PhaseChip } from "@/components/phase-identity";
 
 export default async function ChildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -162,7 +163,7 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">{child.name}</h1>
             {currentPhase ? (
-              <Badge variant="secondary">Phase {currentPhase.phase_number}</Badge>
+              <PhaseChip phase={currentPhase.phase_number} />
             ) : (
               <Badge variant="outline">Not started</Badge>
             )}
@@ -295,15 +296,18 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
         <CardContent>
           {history && history.length > 0 ? (
             <ul className="divide-y">
-              {history.map((h) => (
-                <li key={h.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                  <div className="text-sm">
-                    <span className="font-medium">Phase {phaseNumById.get(h.phase_id) ?? "—"}</span>
-                    <span className="block text-muted-foreground">{formatDate(h.entered_at)}</span>
-                  </div>
-                  <Badge variant="outline">{triggerReasonLabel(h.trigger_reason)}</Badge>
-                </li>
-              ))}
+              {history.map((h) => {
+                const n = phaseNumById.get(h.phase_id);
+                return (
+                  <li key={h.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-2 text-sm">
+                      {n !== undefined ? <PhaseChip phase={n} /> : <span className="font-medium">Phase —</span>}
+                      <span className="text-muted-foreground">{formatDate(h.entered_at)}</span>
+                    </div>
+                    <Badge variant="outline">{triggerReasonLabel(h.trigger_reason)}</Badge>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground">No phase changes recorded yet.</p>

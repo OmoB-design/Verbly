@@ -10,8 +10,9 @@ function Progress({
   value = 0,
   className,
   label,
+  indicatorClassName,
   ...props
-}: React.ComponentProps<"div"> & { value?: number; label?: string }) {
+}: React.ComponentProps<"div"> & { value?: number; label?: string; indicatorClassName?: string }) {
   const clamped = Math.max(0, Math.min(100, value));
   return (
     <div
@@ -25,7 +26,7 @@ function Progress({
       {...props}
     >
       <div
-        className="bg-primary h-full rounded-full transition-[width] duration-300 ease-out"
+        className={cn("bg-primary h-full rounded-full transition-[width] duration-300 ease-out", indicatorClassName)}
         style={{ width: `${clamped}%` }}
       />
     </div>

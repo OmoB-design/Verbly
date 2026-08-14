@@ -3,47 +3,52 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ── Verbly palette: "warm and alive, not childish" ──────────────────────────
+   Warm cream neutrals + deep teal primary + soft coral accent. Caregiver &
+   SLP screens share these tokens (one product); the future child-facing
+   interactive screens get their own separate design pass (DESIGN.md).
+   Per-phase identity colors live in components/phase-identity.tsx. */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 0.75rem;
+  --background: oklch(0.985 0.009 85);
+  --foreground: oklch(0.26 0.022 55);
+  --card: oklch(0.998 0.004 90);
+  --card-foreground: oklch(0.26 0.022 55);
+  --popover: oklch(0.998 0.004 90);
+  --popover-foreground: oklch(0.26 0.022 55);
+  --primary: oklch(0.46 0.085 190);
+  --primary-foreground: oklch(0.985 0.008 85);
+  --secondary: oklch(0.945 0.025 80);
+  --secondary-foreground: oklch(0.32 0.05 190);
+  --muted: oklch(0.95 0.018 82);
+  --muted-foreground: oklch(0.5 0.028 60);
+  --accent: oklch(0.93 0.045 45);
+  --accent-foreground: oklch(0.38 0.09 40);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.9 0.02 80);
+  --input: oklch(0.9 0.02 80);
+  --ring: oklch(0.64 0.08 190);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
+  --background: oklch(0.17 0.015 60);
+  --foreground: oklch(0.955 0.012 85);
+  --card: oklch(0.22 0.018 60);
+  --card-foreground: oklch(0.955 0.012 85);
+  --popover: oklch(0.22 0.018 60);
+  --popover-foreground: oklch(0.955 0.012 85);
+  --primary: oklch(0.78 0.09 185);
+  --primary-foreground: oklch(0.2 0.04 195);
+  --secondary: oklch(0.28 0.022 60);
+  --secondary-foreground: oklch(0.955 0.012 85);
+  --muted: oklch(0.28 0.022 60);
+  --muted-foreground: oklch(0.72 0.022 75);
+  --accent: oklch(0.33 0.045 45);
+  --accent-foreground: oklch(0.93 0.035 60);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
+  --ring: oklch(0.55 0.07 190);
 }
 
 @theme inline {
