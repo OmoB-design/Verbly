@@ -84,3 +84,30 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Celebration confetti (phase-graduation moments). Pieces fall once, then the
+   layer removes itself. Fully disabled for prefers-reduced-motion. */
+@keyframes verbly-confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+.confetti-piece {
+  position: fixed;
+  top: 0;
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: verbly-confetti-fall 2.8s ease-in forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece {
+    display: none;
+  }
+}

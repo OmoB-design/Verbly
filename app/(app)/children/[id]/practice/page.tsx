@@ -4,12 +4,12 @@ import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { PASS_MARK, REQUIRED_CONSECUTIVE_PASSES, nextRetakeSessionId } from "@/lib/engine/advancement";
 import { ReadinessCheck } from "@/components/readiness/readiness-check";
-import { PhaseIconBubble, phaseIdentity } from "@/components/phase-identity";
+import { PhaseIconBubble, PhaseIllustration, phaseIdentity } from "@/components/phase-identity";
+import { GrowthMeter } from "@/components/growth-meter";
 import type { ReadinessContent } from "@/content/readiness/readiness-checks";
 
 /**
@@ -246,16 +246,21 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        {backLink}
-        <h1 className="text-2xl font-semibold tracking-tight">Practice with {child.name}</h1>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          {backLink}
+          <h1 className="text-2xl font-semibold tracking-tight">Practice with {child.name}</h1>
+          {phase ? (
+            <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+              <PhaseIconBubble phase={phase.phase_number} />
+              <span>
+                Phase {phase.phase_number} — {phase.name}
+              </span>
+            </p>
+          ) : null}
+        </div>
         {phase ? (
-          <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <PhaseIconBubble phase={phase.phase_number} />
-            <span>
-              Phase {phase.phase_number} — {phase.name}
-            </span>
-          </p>
+          <PhaseIllustration phase={phase.phase_number} priority className="hidden h-24 w-36 sm:block" />
         ) : null}
       </div>
 
@@ -270,11 +275,7 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            <Progress
-              value={(Math.min(consecutivePasses, REQUIRED_CONSECUTIVE_PASSES) / REQUIRED_CONSECUTIVE_PASSES) * 100}
-              label="Progress toward the next phase"
-              indicatorClassName={phaseIdentity(phase.phase_number).bar}
-            />
+            <GrowthMeter value={Math.min(consecutivePasses, REQUIRED_CONSECUTIVE_PASSES)} phase={phase.phase_number} />
             <p className="text-xs text-muted-foreground">
               {consecutivePasses === 0
                 ? `No passing sessions in a row yet — the "Start here" activity below is the place to begin.`

@@ -11,6 +11,9 @@ import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/client";
 import type { ScriptVariant } from "@/lib/engine/session-script";
 import { SoundCapture } from "@/components/practice/sound-capture";
+import { Celebration } from "@/components/practice/celebration";
+import { GrowthMeter } from "@/components/growth-meter";
+import { PhaseIllustration, phaseIdentity } from "@/components/phase-identity";
 
 /**
  * Session runtime. Executes the version-pinned RL behavior script locally:
@@ -35,6 +38,7 @@ interface CompletePayload {
   score_percent: number;
   advancesPhase: boolean;
   advancedToPhaseNumber: number | null;
+  consecutivePasses: number;
   reason: string;
   ageBracket: { transitioned?: boolean } | null;
   downwardAdvisory: { advise: boolean; reason: string } | null;
@@ -330,6 +334,7 @@ export function SessionRunner({
   if (stage === "brief") {
     return (
       <div className="flex flex-col gap-4">
+        <PhaseIllustration phase={start!.phase_number} priority className="max-h-44 w-full" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{script.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -410,7 +415,7 @@ export function SessionRunner({
             {due ? "Check in now" : paused ? "Paused" : `Next in ${secondsLeft}s`}
           </Badge>
         </div>
-        <Progress value={pct} label="Session progress" />
+        <Progress value={pct} label="Session progress" indicatorClassName={phaseIdentity(start!.phase_number).bar} />
 
         {!due ? (
           <Card>
@@ -537,10 +542,11 @@ export function SessionRunner({
 
   // done
   const r = result!;
+  const graduated = r.outcome === "advance" && r.advancesPhase && r.advancedToPhaseNumber !== null;
   const outcomeCopy =
     r.outcome === "advance"
-      ? r.advancesPhase && r.advancedToPhaseNumber
-        ? `A lovely session — and a milestone: ${childName} is moving on to Phase ${r.advancedToPhaseNumber}!`
+      ? graduated
+        ? `A lovely session — and a milestone: ${childName} is moving on to Phase ${r.advancedToPhaseNumber}! 🎉`
         : `A lovely session. Keep this rhythm going — every session builds on the last.`
       : r.outcome === "retake"
         ? `Good practice today. This one's worth another go soon — repetition is exactly how these skills grow.`
@@ -548,12 +554,19 @@ export function SessionRunner({
 
   return (
     <div className="flex flex-col gap-4">
+      {graduated ? <Celebration /> : null}
+      {graduated ? (
+        <PhaseIllustration phase={r.advancedToPhaseNumber!} priority className="max-h-48 w-full" />
+      ) : null}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Session complete</CardTitle>
+          <CardTitle className="text-xl">{graduated ? "A new phase begins!" : "Session complete"}</CardTitle>
           <CardDescription>{outcomeCopy}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {r.outcome === "advance" && !graduated ? (
+            <GrowthMeter value={Math.min(r.consecutivePasses ?? 0, 3)} phase={start?.phase_number ?? 0} />
+          ) : null}
           <p className="text-sm text-muted-foreground">
             Today&apos;s score: <span className="font-medium text-foreground">{r.score_percent}%</span>
           </p>

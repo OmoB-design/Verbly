@@ -262,6 +262,7 @@ export async function POST(request: Request) {
     score_percent: score,
     advancesPhase: decision.advancesPhase,
     advancedToPhaseNumber,
+    consecutivePasses: decision.consecutivePasses,
     reason: decision.reason,
     ageBracket,
     downwardAdvisory,

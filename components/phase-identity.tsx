@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   Copy,
   Eye,
@@ -90,6 +91,36 @@ export function PhaseChip({
       Phase {phase}
       {name ? <span className="hidden font-normal sm:inline"> · {name}</span> : null}
     </span>
+  );
+}
+
+/** Owner-provided phase illustrations (public/illustrations/phases, 800×~533).
+ *  Decorative (alt="") — every fact they depict is also in adjacent text. */
+export function phaseIllustrationSrc(phase: number): string | null {
+  if (!Number.isInteger(phase) || phase < 1 || phase > 12) return null;
+  return `/illustrations/phases/phase-${String(phase).padStart(2, "0")}.png`;
+}
+
+export function PhaseIllustration({
+  phase,
+  className,
+  priority = false,
+}: {
+  phase: number;
+  className?: string;
+  priority?: boolean;
+}) {
+  const src = phaseIllustrationSrc(phase);
+  if (!src) return null;
+  return (
+    <Image
+      src={src}
+      alt=""
+      width={800}
+      height={533}
+      priority={priority}
+      className={cn("rounded-xl object-cover", className)}
+    />
   );
 }
 
