@@ -22,13 +22,20 @@ export default async function RunSessionPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: child } = await supabase.from("children").select("id, name").eq("id", id).maybeSingle();
+  const { data: child } = await supabase.from("children").select("id, name, primary_language").eq("id", id).maybeSingle();
   if (!child) notFound();
 
   // The account holder's name personalizes the "Caregiver A" role in the
   // script text (display-time only); the helper's name from setup personalizes
   // "Caregiver B".
   const { data: caregiver } = await supabase.from("caregivers").select("full_name").eq("id", user.id).maybeSingle();
+
+  // Voice preference (settings → "Read instructions aloud").
+  const { data: prefs } = await supabase
+    .from("notification_preferences")
+    .select("voice_enabled")
+    .eq("caregiver_id", user.id)
+    .maybeSingle();
 
   // Saved helper roster (settings) — quick-pick in the runner's setup step.
   const { data: roster } = await supabase
@@ -48,6 +55,8 @@ export default async function RunSessionPage({
         sessionId={session_id}
         caregiverName={caregiver?.full_name ?? null}
         savedHelpers={(roster ?? []).map((r) => ({ name: r.display_name, role: r.role }))}
+        voiceEnabledInitial={prefs?.voice_enabled === true}
+        primaryLanguage={child.primary_language ?? null}
       />
     </div>
   );

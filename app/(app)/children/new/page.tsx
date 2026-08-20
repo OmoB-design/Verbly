@@ -26,8 +26,8 @@ export default function NewChildPage() {
               <Input id="name" name="name" type="text" required className="h-11" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="dob">Date of birth (optional)</Label>
-              <Input id="dob" name="dob" type="date" className="h-11" />
+              <Label htmlFor="dob">Date of birth</Label>
+              <Input id="dob" name="dob" type="date" required className="h-11" />
               <p className="text-xs text-muted-foreground">
                 Used to choose age-appropriate activities. You can add it later.
               </p>

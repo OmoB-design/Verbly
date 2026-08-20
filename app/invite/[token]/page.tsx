@@ -30,7 +30,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         <CardContent className="flex flex-col gap-4">{body}</CardContent>
       </Card>
       <p className="text-xs text-muted-foreground">
-        Verbly is a screening and home-practice tool, not a substitute for professional evaluation.
+        This isn&apos;t a diagnosis — it&apos;s a starting point.
       </p>
     </main>
   );
@@ -87,7 +87,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         {grantSummary}
         <div className="flex flex-col gap-2">
           <Button asChild>
-            <Link href={`/signup?type=slp&next=${encodeURIComponent(next)}`}>Create an SLP account</Link>
+            <Link href={`/signup/slp?next=${encodeURIComponent(next)}`}>Create an SLP account</Link>
           </Button>
           <Button asChild variant="outline">
             <Link href={`/login?next=${encodeURIComponent(next)}`}>I already have an account</Link>

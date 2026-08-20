@@ -95,9 +95,7 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
           <CardDescription>{placementModeCopy(result.placement_mode, childName)}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
-          {result.reasoning.map((line, i) => (
-            <p key={i}>{line}</p>
-          ))}
+          <ReasoningNarrative lines={result.reasoning} />
           {result.start_in_simplified ? <p>{simplifiedCopy(childName)}</p> : null}
           {result.two_adult_advisory ? (
             <p className="rounded-md bg-muted/50 px-3 py-2 text-foreground/80">{twoAdultCopy()}</p>
@@ -144,11 +142,8 @@ export function CompassResults({ result, assessmentId, childId, childName, onOve
         </div>
       ) : null}
 
-      {/* Clinical-framing reminder (stays visible, not just at onboarding). */}
-      <p className="text-xs text-muted-foreground">
-        The Communication Compass is a screening and placement tool, not a validated clinical measure or a diagnosis.
-        It isn&apos;t a substitute for a professional evaluation.
-      </p>
+      {/* Clinical framing, one line (full text lives in Settings → Data & privacy). */}
+      <p className="text-xs text-muted-foreground">This isn&apos;t a diagnosis — it&apos;s a starting point.</p>
 
       <Separator />
 
@@ -304,5 +299,29 @@ function OverrideControl({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+
+/** Max two sentences of reasoning displayed; "Read more" expands the rest
+ *  (owner text-reduction ruling). */
+function ReasoningNarrative({ lines }: { lines: string[] }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const visible = expanded ? lines : lines.slice(0, 2);
+  return (
+    <>
+      {visible.map((line, i) => (
+        <p key={i}>{line}</p>
+      ))}
+      {lines.length > 2 && !expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="self-start text-xs underline underline-offset-4 hover:text-foreground"
+        >
+          Read more
+        </button>
+      ) : null}
+    </>
   );
 }

@@ -4,10 +4,11 @@ import { Suspense } from "react";
 
 import { SignupForm } from "@/components/auth/signup-form";
 
-export default function SignupPage() {
+/** Dedicated SLP signup URL (shareable, linked from invites). */
+export default function SlpSignupPage() {
   return (
     <Suspense>
-      <SignupForm />
+      <SignupForm slp />
     </Suspense>
   );
 }

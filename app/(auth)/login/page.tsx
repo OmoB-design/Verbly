@@ -8,6 +8,7 @@ import { login } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function LoginPage() {
   return (
@@ -19,7 +20,9 @@ export default function LoginPage() {
 
 function LoginForm() {
   const [state, formAction, pending] = useActionState(login, undefined);
-  const next = useSearchParams().get("next") ?? "";
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") ?? "";
+  const justSignedUp = searchParams.get("confirm") === "1";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-6 py-16">
@@ -30,6 +33,12 @@ function LoginForm() {
         </p>
       </div>
 
+      {justSignedUp ? (
+        <p className="rounded-lg border border-primary/30 bg-accent/40 px-3 py-2 text-sm">
+          Almost there — check your email and tap the confirmation link, then log in here.
+        </p>
+      ) : null}
+
       <form action={formAction} className="flex flex-col gap-4">
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <div className="grid gap-2">
@@ -38,13 +47,7 @@ function LoginForm() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-          />
+          <PasswordInput id="password" name="password" autoComplete="current-password" required />
         </div>
 
         {state?.error ? (

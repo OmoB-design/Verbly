@@ -40,6 +40,7 @@ const OPTIONS = [
 // Simplified Session — One Sound, One Sense (shared, F7).
 const SIMPLIFIED: ScriptVariant = {
   title: "One Sound, One Sense",
+  mouth_animation_ref: "p3-single-sound", // placeholder — asset pending SLP sign-off (owner spec)
   overview:
     "Narrows practice to a single sound target for the whole session and adds a direct touch cue, so the child is not asked to process a mirror, a sequence of sounds, and a new motor pattern all at once.",
   materials: [
@@ -90,6 +91,7 @@ const SIMPLIFIED: ScriptVariant = {
 // Sessions 3 and 4 are identical in the source (P3-b) — one definition, seeded twice.
 const TONGUE_SESSION: ScriptVariant = {
   title: "Tongue Exercises: /t/ /d/ /l/ /n/ Sounds",
+  mouth_animation_ref: "p3-tongue-elevation", // placeholder — asset pending SLP sign-off (owner spec)
   overview: [
     "Build tongue tip placement and coordination while introducing the sounds /t/, /d/, /l/, and /n/ through structured play with edible rewards and interactive games. A 45-minute session.",
     "Timetable: 0–15 min warm-up with mirror and modelling (Activity 1); 15–25 min record 4–5 short video clips, watch together, celebrate the good ones; 25–35 min modelling practice (Activity 2); 35–45 min Nose Tap game (many trials + mirror).",
@@ -181,6 +183,7 @@ export const PHASE_03: PhaseSeed = {
       script: {
         script_version: 1,
         title: "Facial Awareness Warm-Up",
+  mouth_animation_ref: "p3-facial-awareness", // placeholder — asset pending SLP sign-off (owner spec)
         overview:
           "Help the child become aware of their own face and begin noticing mouth movements — the foundation for all oral motor exercises that follow.",
         materials: [
@@ -213,6 +216,7 @@ export const PHASE_03: PhaseSeed = {
       script: {
         script_version: 1,
         title: "Lip Exercises: /m/ /p/ /b/ Sounds",
+  mouth_animation_ref: "p3-lip-closure", // placeholder — asset pending SLP sign-off (owner spec)
         overview: [
           "Strengthen lip closure and breath control while introducing the child to the sounds /m/, /p/, and /b/ through a playful, game-based format. A 45-minute session.",
           "Timetable: 0–15 min warm-up with mirror and modelling (Activity 1); 15–25 min record 4–5 short video clips, watch together, celebrate the good ones; 25–35 min modelling practice (Activity 2); 35–45 min Bubble Pop game (many trials + mirror).",

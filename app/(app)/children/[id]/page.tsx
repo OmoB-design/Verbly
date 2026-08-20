@@ -232,9 +232,14 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
       ) : null}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recent sessions</CardTitle>
-          <CardDescription>The last few practice sessions and how they went.</CardDescription>
+        <CardHeader className="flex-row items-start justify-between space-y-0">
+          <div>
+            <CardTitle className="text-lg">Recent sessions</CardTitle>
+            <CardDescription>The last few practice sessions and how they went.</CardDescription>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/children/${id}/sessions`}>View sessions</Link>
+          </Button>
         </CardHeader>
         <CardContent>
           {sessions && sessions.length > 0 ? (
@@ -289,9 +294,14 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
       ) : null}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Progress history</CardTitle>
-          <CardDescription>Every change to this child&apos;s phase, and why.</CardDescription>
+        <CardHeader className="flex-row items-start justify-between space-y-0">
+          <div>
+            <CardTitle className="text-lg">Progress history</CardTitle>
+            <CardDescription>Every change to this child&apos;s phase, and why.</CardDescription>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/children/${id}/progress`}>View progress</Link>
+          </Button>
         </CardHeader>
         <CardContent>
           {history && history.length > 0 ? (

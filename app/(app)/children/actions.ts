@@ -20,6 +20,7 @@ export async function createChild(
 ): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
   const dobRaw = String(formData.get("dob") ?? "").trim();
+  if (!dobRaw) return { error: "Please enter a date of birth — it picks age-appropriate activities." };
 
   if (!name) {
     return { error: "Please enter the child's name." };

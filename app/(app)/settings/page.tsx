@@ -9,7 +9,7 @@ import { CURRICULUM_VERSION, COMPASS_SCHEMA_VERSION } from "@/lib/compass/contra
 import { READINESS_SCHEMA_VERSION } from "@/content/readiness/readiness-checks";
 import { PhaseChip } from "@/components/phase-identity";
 import { DeleteAccountCard, DownloadDataButton } from "@/components/settings/account-controls";
-import { updateFrequency } from "./actions";
+import { updateFrequency, updateVoiceEnabled } from "./actions";
 
 const OPTIONS: { value: string; label: string; hint: string }[] = [
   { value: "daily", label: "Daily", hint: "A short note each day." },
@@ -32,7 +32,7 @@ export default async function SettingsPage() {
   if (!user) redirect("/login");
 
   const [{ data: prefs }, { data: children }] = await Promise.all([
-    supabase.from("notification_preferences").select("frequency").eq("caregiver_id", user.id).maybeSingle(),
+    supabase.from("notification_preferences").select("frequency, voice_enabled").eq("caregiver_id", user.id).maybeSingle(),
     supabase.from("children").select("id, name, current_phase_id").order("created_at", { ascending: true }),
   ]);
   const current = prefs?.frequency ?? "weekly";
@@ -141,6 +141,40 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* ── Session preferences ──────────────────────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Session preferences</CardTitle>
+          <CardDescription>
+            Check-in pace is set by each activity&apos;s programme; preferences you control live here.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={updateVoiceEnabled} className="flex flex-col gap-3">
+            <label htmlFor="voice_enabled" className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3">
+              <input
+                id="voice_enabled"
+                name="voice_enabled"
+                type="checkbox"
+                defaultChecked={prefs?.voice_enabled === true}
+                className="mt-0.5 size-4"
+              />
+              <span className="text-sm">
+                <span className="font-medium">Read instructions aloud</span>
+                <span className="text-muted-foreground block">
+                  Hear activity instructions during sessions — useful when your hands are busy.
+                </span>
+              </span>
+            </label>
+            <div>
+              <Button type="submit" size="sm">
+                Save
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       {/* ── Data & privacy ───────────────────────────────────────────────── */}
       <Card>
         <CardHeader>
@@ -161,6 +195,13 @@ export default async function SettingsPage() {
             </p>
             <p>
               You can download everything below in a readable format, and delete everything under Account.
+            </p>
+            <p className="border-l-2 pl-3">
+              <span className="text-foreground font-medium">The full picture:</span> the Communication Compass and
+              Verbly&apos;s activities are a screening and home-practice tool. They are not a validated clinical
+              instrument, results are never a diagnosis, and nothing here substitutes for professional evaluation by a
+              speech-language pathologist. If anything you see worries you, that&apos;s a conversation for an SLP or
+              your paediatrician.
             </p>
           </div>
           <DownloadDataButton />

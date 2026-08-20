@@ -25,6 +25,9 @@ export default async function DashboardPage() {
   const { data: slp } = await supabase.from("slps").select("id").eq("id", user.id).maybeSingle();
   if (slp) redirect("/slp");
 
+  const { data: me } = await supabase.from("caregivers").select("full_name").eq("id", user.id).maybeSingle();
+  const firstName = (me?.full_name ?? "").trim().split(/\s+/)[0] || null;
+
   const { data: children, error } = await supabase
     .from("children")
     .select("id, name, dob, current_phase_id, created_at")
@@ -44,7 +47,12 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Your children</h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {firstName ? `Welcome, ${firstName}` : "Welcome"}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your children</p>
+        </div>
         {(children ?? []).length < CHILD_PROFILE_CAP ? (
           <Button asChild className="h-11 px-5">
             <Link href="/children/new">Add a child</Link>
@@ -110,6 +118,7 @@ export default async function DashboardPage() {
             <p className="text-muted-foreground">
               No children added yet. Add one to get started — it only takes a moment.
             </p>
+            <p className="text-xs text-muted-foreground">Your account can hold up to 5 child profiles.</p>
             <Button asChild className="h-11 px-5">
               <Link href="/children/new">Add a child</Link>
             </Button>

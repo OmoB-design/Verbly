@@ -569,11 +569,12 @@ function StepBody(props: {
   const { step, childName } = props;
 
   if (step.kind === "item") {
-    const hint = step.item.domain !== "oral_motor" ? DOMAIN_UI[step.item.domain]?.hint : undefined;
+    // Text-reduction ruling: no domain descriptions in the question flow — the
+    // questions themselves make the domain obvious.
     const selected = props.responses[step.item.id];
     return (
       <>
-        <QuestionText hint={hint}>{step.item.prompt}</QuestionText>
+        <QuestionText>{step.item.prompt}</QuestionText>
         <div className="flex flex-col gap-2">
           {Object.keys(step.item.points).map((opt) => (
             <OptionButton key={opt} selected={selected === opt} onClick={() => props.setResponse(step.item.id, opt)}>

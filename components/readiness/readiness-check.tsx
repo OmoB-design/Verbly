@@ -95,11 +95,7 @@ export function ReadinessCheck({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">A quick check before the first session</CardTitle>
-        <CardDescription>
-          Five yes-or-no questions about {childName} — about 90 seconds. There are no wrong answers, and{" "}
-          {childName} starts their activities either way; this just helps us pitch the first session right.
-        </CardDescription>
+        <CardTitle className="text-lg">Before your first session, five quick questions.</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {items.map((item, idx) => (

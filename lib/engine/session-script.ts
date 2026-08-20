@@ -66,6 +66,14 @@ export interface ScriptVariant {
     options: CheckinOption[];
   };
   bonus?: ScriptBonus;
+  /**
+   * Phases 3 & 12 only (owner spec): reference to the looping 2D mouth-shape
+   * animation modelling this exercise's target. Content-driven — the mapping
+   * lives HERE in versioned content, never in runtime code. Optional: no ref,
+   * no animation. Assets ship only after SLP sign-off of the shapes; until
+   * then refs point at not-yet-present files and the player hides itself.
+   */
+  mouth_animation_ref?: string;
 }
 
 /** content_json root. `simplified` is the session's Simplified variant
@@ -117,5 +125,6 @@ export function parseSessionScript(contentJson: unknown): SessionScript | null {
   if (x.script_version !== 1) return null;
   if (!isVariant(x)) return null;
   if (x.simplified !== undefined && !isVariant(x.simplified)) return null;
+  if (x.mouth_animation_ref !== undefined && typeof x.mouth_animation_ref !== "string") return null;
   return contentJson as SessionScript;
 }

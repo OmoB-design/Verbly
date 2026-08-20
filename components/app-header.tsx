@@ -18,6 +18,11 @@ export function AppHeader({ isSlp = false }: { isSlp?: boolean }) {
           </Button>
           {!isSlp ? (
             <Button asChild variant="ghost" className="h-11">
+              <Link href="/chat">Chat</Link>
+            </Button>
+          ) : null}
+          {!isSlp ? (
+            <Button asChild variant="ghost" className="h-11">
               <Link href="/settings">Settings</Link>
             </Button>
           ) : null}

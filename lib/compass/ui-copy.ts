@@ -78,11 +78,10 @@ export function twoAdultCopy(): string {
   return "This phase works best with a second person to help — one to guide, one to be the communication partner. A family member or friend in the room is perfect; they don't need their own account.";
 }
 
-/** Warm, non-diagnostic intro shown before the assessment begins. */
+/** Intro before the assessment: 3 lines — what it is, how long, what you get
+ *  (owner text-reduction ruling). Nothing else before the first question. */
 export const INTRO_COPY = {
   title: "The Communication Compass",
-  lede:
-    "A few questions about how your child communicates day to day. There are no right or wrong answers — just tell us what you usually see. It takes about ten minutes.",
-  reassurance:
-    "Disclaimer: This is a starting point to personalize activities, not a test or a diagnosis. It isn't a substitute for a professional evaluation.",
+  lede: "A few questions about how your child communicates day to day — about ten minutes.",
+  reassurance: "You'll get a personalised starting point for practice — not a test result or a diagnosis.",
 };

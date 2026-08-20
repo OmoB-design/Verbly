@@ -26,9 +26,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children}</main>
       <footer className="border-t">
         <p className="mx-auto max-w-4xl px-4 py-4 text-xs text-muted-foreground">
-          Verbly supports home practice and is{" "}
-          <strong className="font-medium">not a substitute for professional evaluation</strong> by a
-          speech-language pathologist.
+          This isn&apos;t a diagnosis — it&apos;s a starting point.{" "}
+          <a href="/settings" className="underline underline-offset-4 hover:text-foreground">
+            Full details
+          </a>
         </p>
       </footer>
     </div>

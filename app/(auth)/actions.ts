@@ -47,20 +47,21 @@ export async function signup(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
-  // The SLP variant is opted into explicitly (toggle / ?type=slp link from an
-  // invite). The handle_new_user() trigger branches on account_type to create
-  // the slps row instead of a caregivers row.
+  if (!fullName) return { error: "Please tell us your name." };
+  // The SLP variant has its own URL (/signup/slp, linked from invites). The
+  // handle_new_user() trigger branches on account_type to create the slps row
+  // instead of a caregivers row.
   const isSlp = String(formData.get("account_type") ?? "") === "slp";
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
         account_type: isSlp ? "slp" : "caregiver",
         ...(isSlp ? {} : { role: "primary" }),
-        full_name: fullName || null,
+        full_name: fullName,
       },
     },
   });
@@ -69,9 +70,13 @@ export async function signup(
     return { error: error.message };
   }
 
-  // If email confirmation is enabled, the user must confirm before a session
-  // exists; otherwise they're signed in immediately.
   revalidatePath("/", "layout");
+  // Email confirmation pending → no session yet. Land on login with a clear
+  // check-your-email notice instead of bouncing them there unexplained.
+  if (!data.session) {
+    const next = safeNext(formData);
+    redirect(`/login?confirm=1${next !== "/dashboard" ? `&next=${encodeURIComponent(next)}` : ""}`);
+  }
   redirect(safeNext(formData));
 }
 

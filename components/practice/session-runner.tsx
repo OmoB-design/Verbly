@@ -11,9 +11,13 @@ import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/client";
 import type { ScriptVariant } from "@/lib/engine/session-script";
 import { SoundCapture } from "@/components/practice/sound-capture";
+import { MouthModel } from "@/components/practice/mouth-model";
 import { Celebration } from "@/components/practice/celebration";
 import { GrowthMeter } from "@/components/growth-meter";
 import { PhaseArt, phaseIdentity } from "@/components/phase-identity";
+import { RotateCcw, Volume2, VolumeX } from "lucide-react";
+import { cancelSpeech, pickLang, reducedMotion, speak, speechAvailable } from "@/lib/speech";
+import { updateVoiceEnabled } from "@/app/(app)/settings/actions";
 
 /**
  * Session runtime. Executes the version-pinned RL behavior script locally:
@@ -56,6 +60,8 @@ export function SessionRunner({
   sessionId,
   caregiverName,
   savedHelpers = [],
+  voiceEnabledInitial = false,
+  primaryLanguage = null,
 }: {
   childId: string;
   childName: string;
@@ -63,6 +69,8 @@ export function SessionRunner({
   caregiverName?: string | null;
   /** Saved roster from settings — quick-pick, so names aren't retyped. */
   savedHelpers?: { name: string; role: string }[];
+  voiceEnabledInitial?: boolean;
+  primaryLanguage?: string | null;
 }) {
   const supabase = React.useMemo(() => createClient(), []);
 
@@ -89,6 +97,66 @@ export function SessionRunner({
 
   const script = start?.script ?? null;
   const totalCheckins = script?.checkin.count ?? 0;
+
+  // Text-reduction ruling: the brief shows the overview's FIRST sentence; the
+  // remainder folds into "Tips for this session". Content itself is untouched.
+  const overview = script?.overview ?? "";
+  const sentenceBreak = overview.search(/(?<=[.!?])\s/);
+  const overviewFirstSentence = sentenceBreak > 0 ? overview.slice(0, sentenceBreak) : overview;
+  const overviewRest = sentenceBreak > 0 ? overview.slice(sentenceBreak).trim() : "";
+
+  // Voice instructions (owner spec): browser speechSynthesis only, off by
+  // default, preference persisted in settings. Auto-play is suppressed under
+  // prefers-reduced-motion — the replay button still speaks on demand.
+  const [voiceOn, setVoiceOn] = React.useState(voiceEnabledInitial);
+  const sayNow = React.useCallback(
+    (text: string) => speak(text, pickLang(primaryLanguage)),
+    [primaryLanguage],
+  );
+  const autoSay = React.useCallback(
+    (text: string) => {
+      if (voiceOn && !reducedMotion()) speak(text, pickLang(primaryLanguage));
+    },
+    [voiceOn, primaryLanguage],
+  );
+  function toggleVoice() {
+    const next = !voiceOn;
+    setVoiceOn(next);
+    if (!next) cancelSpeech();
+    const fd = new FormData();
+    if (next) fd.set("voice_enabled", "on");
+    void updateVoiceEnabled(fd); // persists in settings; survives navigation
+  }
+  React.useEffect(() => () => cancelSpeech(), []);
+  // Read the activity instruction when the session (brief) screen loads.
+  React.useEffect(() => {
+    if (stage === "brief" && overviewFirstSentence) autoSay(personalize(overviewFirstSentence));
+    if (stage !== "brief" && stage !== "running") cancelSpeech();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
+  // Read each check-in prompt when it appears.
+  React.useEffect(() => {
+    if (stage === "running" && due && pendingBonus === null && script) {
+      autoSay(personalize(script.checkin.question));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [due, pendingBonus, stage]);
+
+  const voiceToggleButton = speechAvailable() ? (
+    <button
+      type="button"
+      onClick={toggleVoice}
+      aria-pressed={voiceOn}
+      aria-label={voiceOn ? "Turn voice off" : "Read instructions aloud"}
+      title={voiceOn ? "Voice on — tap to turn off" : "Read instructions aloud"}
+      className={
+        "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors " +
+        (voiceOn ? "border-primary bg-primary/10 text-primary" : "border-input text-muted-foreground hover:bg-muted/50")
+      }
+    >
+      {voiceOn ? <Volume2 className="size-4" aria-hidden /> : <VolumeX className="size-4" aria-hidden />}
+    </button>
+  ) : null;
 
   // Display-time personalization of the script's role names (owner feedback
   // 2026-08-09): "Caregiver A" → the account holder's name (from signup),
@@ -359,25 +427,44 @@ export function SessionRunner({
   if (stage === "brief") {
     return (
       <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{script.title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">{script.title}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
             Phase {start!.phase_number}, Session {start!.session_number}
             {start!.simplified
               ? start!.simplified_reason === "readiness_ease_in"
                 ? " · a gentle introductory version to settle in"
                 : " · a gentler version this time"
               : ""}
-          </p>
+            </p>
+          </div>
+          {voiceToggleButton}
         </div>
 
         <PhaseArt phase={start!.phase_number} priority />
 
-        {script.overview ? (
-          <Card>
-            <CardContent className="py-4 text-sm text-muted-foreground">{personalize(script.overview)}</CardContent>
-          </Card>
+        {/* Text-reduction ruling: one sentence on what to do; everything else
+            folds away. Steps stay one tap away (and repeat inside the running
+            screen) — removing them entirely would leave first-timers unsure. */}
+        {overviewFirstSentence ? (
+          <p className="flex items-start gap-2 text-sm">
+            <span>{personalize(overviewFirstSentence)}</span>
+            {voiceOn ? (
+              <button
+                type="button"
+                onClick={() => sayNow(personalize(overviewFirstSentence))}
+                aria-label="Replay instruction"
+                title="Replay instruction"
+                className="text-muted-foreground hover:text-foreground mt-0.5 shrink-0"
+              >
+                <RotateCcw className="size-4" aria-hidden />
+              </button>
+            ) : null}
+          </p>
         ) : null}
+
+        {script.mouth_animation_ref ? <MouthModel animationRef={script.mouth_animation_ref} /> : null}
 
         {script.materials && script.materials.length > 0 ? (
           <Card>
@@ -394,28 +481,31 @@ export function SessionRunner({
           </Card>
         ) : null}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">How it goes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="flex flex-col gap-3">
-              {script.steps.map((s, i) => (
-                <li key={i} className="flex gap-3 text-sm">
-                  <span className="text-muted-foreground">{i + 1}.</span>
-                  <span>
-                    <span className="font-medium">{s.title}</span>
-                    <span className="block text-muted-foreground">{personalize(s.instruction)}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
+        <details className="rounded-lg border px-4 py-3">
+          <summary className="cursor-pointer text-sm font-medium">Step-by-step guide</summary>
+          <ol className="mt-3 flex flex-col gap-3">
+            {script.steps.map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm">
+                <span className="text-muted-foreground">{i + 1}.</span>
+                <span>
+                  <span className="font-medium">{s.title}</span>
+                  <span className="block text-muted-foreground">{personalize(s.instruction)}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </details>
 
-        <p className="text-sm text-muted-foreground">
-          While you play, we&apos;ll check in every {script.checkin.interval_seconds} seconds —{" "}
-          {script.checkin.count} quick taps in total. Keep your attention on {childName}; the screen can wait.
+        {overviewRest ? (
+          <details className="rounded-lg border px-4 py-3">
+            <summary className="cursor-pointer text-sm font-medium">Tips for this session</summary>
+            <p className="mt-2 text-sm text-muted-foreground">{personalize(overviewRest)}</p>
+          </details>
+        ) : null}
+
+        <p className="text-xs text-muted-foreground">
+          {script.checkin.count} quick check-ins, about every {script.checkin.interval_seconds} seconds. Keep your
+          attention on {childName}; the screen can wait.
         </p>
 
         <div>
@@ -437,9 +527,12 @@ export function SessionRunner({
               Check-in {Math.min(checkinIdx + 1, totalCheckins)} of {totalCheckins}
             </p>
           </div>
-          <Badge variant={due ? "default" : "secondary"}>
-            {due ? "Check in now" : paused ? "Paused" : `Next in ${secondsLeft}s`}
-          </Badge>
+          <span className="flex items-center gap-2">
+            {voiceToggleButton}
+            <Badge variant={due ? "default" : "secondary"}>
+              {due ? "Check in now" : paused ? "Paused" : `Next in ${secondsLeft}s`}
+            </Badge>
+          </span>
         </div>
         <Progress value={pct} label="Session progress" indicatorClassName={phaseIdentity(start!.phase_number).bar} />
 
@@ -515,7 +608,20 @@ export function SessionRunner({
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{personalize(script.checkin.question)}</CardTitle>
+              <CardTitle className="flex items-start justify-between gap-2 text-base">
+                <span>{personalize(script.checkin.question)}</span>
+                {voiceOn ? (
+                  <button
+                    type="button"
+                    onClick={() => sayNow(personalize(script.checkin.question))}
+                    aria-label="Replay question"
+                    title="Replay question"
+                    className="text-muted-foreground hover:text-foreground mt-0.5 shrink-0"
+                  >
+                    <RotateCcw className="size-4" aria-hidden />
+                  </button>
+                ) : null}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
               {script.checkin.options.map((opt, i) => (
@@ -538,6 +644,8 @@ export function SessionRunner({
             ))}
           </ol>
         </details>
+
+        {script.mouth_animation_ref ? <MouthModel animationRef={script.mouth_animation_ref} /> : null}
 
         {/* Vocalization capture — always available; the curriculum asks for
             sounds to be documented as they happen (esp. Phases 9–12). */}

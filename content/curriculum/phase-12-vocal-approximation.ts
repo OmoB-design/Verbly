@@ -129,6 +129,7 @@ export const PHASE_12: PhaseSeed = {
       script: {
         script_version: 1,
         title: "Capturing and Rewarding Any Vocal Attempt",
+  mouth_animation_ref: "p12-open-vowel", // placeholder — asset pending SLP sign-off (owner spec)
         overview:
           "Create optimal conditions for the child to produce any vocalisation — then immediately capture and reinforce it to increase its frequency and reliability. The first goal is simply more vocal output, from any source, for any reason. A 15-minute session.",
         materials: [
@@ -180,6 +181,7 @@ export const PHASE_12: PhaseSeed = {
       script: {
         script_version: 1,
         title: "Shaping Approximations Toward Target Words",
+  mouth_animation_ref: "p12-sound-shaping", // placeholder — asset pending SLP sign-off (owner spec)
         overview:
           "Take the vocalisations captured in Session 1 and begin systematically shaping them toward the actual target words — using differential reinforcement to reward sounds that are progressively closer to the correct pronunciation. Shaping means rewarding successive approximations: reward the best attempt in each trial, not only perfect productions. Progress is measured in steps, not words. Example sequence for 'more': Step 1 any vocalisation → Step 2 vowel sound ('ah'/'oh') → Step 3 nasal approximation ('mmm'/'moh') → Step 4 close approximation ('mo'/'mor') → Step 5 the target word. A 15-minute session.",
         materials: [
@@ -236,6 +238,7 @@ export const PHASE_12: PhaseSeed = {
       script: {
         script_version: 1,
         title: "Combining Sounds and Generalising to Daily Routines",
+  mouth_animation_ref: "p12-syllable-combining", // placeholder — asset pending SLP sign-off (owner spec)
         overview:
           "Build on shaped approximations by encouraging the child to combine two sounds — the first step toward multi-word communication — and by embedding vocalisation practice into natural daily routines. First 8 minutes: combining sounds. Final 7 minutes: generalising to a daily routine. A 15-minute session.",
         materials: [
