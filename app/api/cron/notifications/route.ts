@@ -90,6 +90,7 @@ export async function GET(request: Request) {
     const lastSessionAt = new Map<string, number>();
     const pendingMilestones: PendingEvent[] = [];
     const pendingRetakes: PendingEvent[] = [];
+    const pendingReassessments: PendingEvent[] = [];
 
     if (childIds.length > 0) {
       const { data: sessions } = await admin
@@ -134,6 +135,31 @@ export async function GET(request: Request) {
           phaseNumber: phaseNumById.get(a.phase_id) ?? null,
         });
       }
+
+      // Reassessment check-ins (§11): latest scored assessment per child whose
+      // suggested interval has elapsed — nudged at most once per assessment.
+      const { data: assessments } = await admin
+        .from("assessments")
+        .select("id, child_id, completed_at, suggested_reassessment_interval")
+        .in("child_id", childIds)
+        .eq("status", "scored")
+        .order("completed_at", { ascending: false });
+      const latestByChild = new Map<string, (typeof assessments extends (infer T)[] | null ? T : never)>();
+      for (const a of assessments ?? []) {
+        if (!latestByChild.has(a.child_id)) latestByChild.set(a.child_id, a);
+      }
+      for (const a of latestByChild.values()) {
+        if (!a.completed_at || sentKeys.has(`reassess:${a.id}`)) continue;
+        const m = /^(\d+)\s*(day|week|month)s?$/.exec((a.suggested_reassessment_interval ?? "").trim());
+        const days = m ? Number(m[1]) * (m[2] === "day" ? 1 : m[2] === "week" ? 7 : 30) : 42;
+        if (nowMs - Date.parse(a.completed_at) >= days * DAY_MS) {
+          pendingReassessments.push({
+            id: a.id,
+            childId: a.child_id,
+            childName: childName.get(a.child_id) ?? "your child",
+          });
+        }
+      }
     }
 
     const children: PlannerChild[] = childIds.map((id) => ({
@@ -155,6 +181,7 @@ export async function GET(request: Request) {
       children,
       pendingMilestones,
       pendingRetakes,
+      pendingReassessments,
       encouragementLine: ENCOURAGEMENT_BANK[periodIndex % ENCOURAGEMENT_BANK.length],
       periodBucket,
     });

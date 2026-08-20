@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Verbly mark: a speech bubble with a growing sprout — speech + growth. -->
+  <rect x="4" y="6" width="56" height="44" rx="14" fill="#0f766e"/>
+  <path d="M18 50 L18 60 L30 50 Z" fill="#0f766e"/>
+  <path d="M32 40 L32 26" stroke="#fffbeb" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32 30 C32 22 26 18 19 18 C19 26 25 30 32 30 Z" fill="#fffbeb"/>
+  <path d="M32 26 C32 20 37 16 44 16 C44 23 39 26 32 26 Z" fill="#5eead4"/>
+</svg>

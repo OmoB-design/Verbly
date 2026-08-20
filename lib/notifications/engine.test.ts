@@ -13,6 +13,7 @@ const base: PlannerContext = {
   children: [],
   pendingMilestones: [],
   pendingRetakes: [],
+  pendingReassessments: [],
   encouragementLine: "You're doing it.",
   periodBucket: "d20833",
 };
@@ -76,5 +77,21 @@ describe("planNotifications", () => {
   it("reminder dedupe key is per child per period", () => {
     const out = planNotifications({ ...base, children: [{ id: "x", name: "X", lastSessionAt: null }] });
     expect(out.find((n) => n.type === "session_reminder")?.dedupeKey).toBe("reminder:x:d20833");
+  });
+});
+
+describe("reassessment_due (§11 check-in nudge)", () => {
+  it("plans a once-per-assessment nudge when the interval has elapsed", () => {
+    const planned = planNotifications({
+      ...base,
+      pendingReassessments: [{ id: "assess-1", childId: "c1", childName: "Eniola" }],
+    });
+    const nudge = planned.find((p) => p.type === "reassessment_due");
+    expect(nudge).toBeDefined();
+    expect(nudge!.dedupeKey).toBe("reassess:assess-1");
+    expect(nudge!.subject).toContain("how things are going");
+    // §11: never framed as "retake the test".
+    expect(nudge!.subject.toLowerCase()).not.toContain("retake");
+    expect(nudge!.body.toLowerCase()).not.toContain("test");
   });
 });

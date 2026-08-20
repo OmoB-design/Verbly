@@ -30,7 +30,7 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
 
   const { data: child } = await supabase
     .from("children")
-    .select("id, name, current_phase_id, age_bracket, second_adult_available")
+    .select("id, name, current_phase_id, age_bracket, second_adult_available, programme_completed_at")
     .eq("id", id)
     .maybeSingle();
   if (!child) notFound();
@@ -280,7 +280,18 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
         ) : null}
       </div>
 
-      {phase ? (
+      {child.programme_completed_at ? (
+        <Card className="border-2 border-emerald-300/80 dark:border-emerald-700/60">
+          <CardHeader>
+            <CardTitle className="text-base">All twelve phases complete 🎉</CardTitle>
+            <CardDescription>
+              {child.name} finished the whole programme. Every activity below stays open for revisiting whenever
+              practice feels good — and retaking the Communication Compass is a lovely way to see how far they&apos;ve
+              come.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : phase ? (
         <Card className={cn("border-2", phaseIdentity(phase.phase_number).cardAccent)}>
           <CardHeader>
             <CardTitle className="text-base">The goal for this phase</CardTitle>

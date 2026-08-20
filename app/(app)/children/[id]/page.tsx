@@ -22,7 +22,7 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
 
   const { data: child } = await supabase
     .from("children")
-    .select("id, name, dob, current_phase_id")
+    .select("id, name, dob, current_phase_id, programme_completed_at")
     .eq("id", id)
     .maybeSingle();
   if (!child) notFound();
@@ -167,6 +167,11 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
             ) : (
               <Badge variant="outline">Not started</Badge>
             )}
+            {child.programme_completed_at ? (
+              <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
+                Programme complete 🎉
+              </Badge>
+            ) : null}
           </div>
           <Button asChild>
             <Link href={`/children/${id}/edit`}>Edit profile</Link>

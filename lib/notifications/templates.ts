@@ -51,6 +51,19 @@ export function renderSessionReminder(childName: string): RenderedEmail {
   };
 }
 
+/** §11: reassessment nudges read as a natural check-in ("let's see how things
+ *  are going"), never as "retake the test". */
+export function renderReassessmentDue(childName: string): RenderedEmail {
+  return {
+    subject: `Let's see how things are going with ${childName}`,
+    body: withFooter(
+      `It's been a little while since ${childName}'s Communication Compass. Children change quickly — ` +
+        `a fresh look takes about ten minutes and keeps the activities matched to where ${childName} is now. ` +
+        `You'll find it under ${childName}'s settings whenever you're ready.`,
+    ),
+  };
+}
+
 export function renderEncouragement(line: string): RenderedEmail {
   return { subject: "A small note from Verbly", body: withFooter(line) };
 }

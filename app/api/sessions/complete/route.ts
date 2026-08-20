@@ -182,6 +182,7 @@ export async function POST(request: Request) {
 
   // 5. On phase graduation, write the single audit trail row and move the child.
   let advancedToPhaseNumber: number | null = null;
+  let programmeComplete = false;
   if (decision.advancesPhase) {
     const { data: nextPhase } = await admin
       .schema("curriculum_content")
@@ -207,8 +208,17 @@ export async function POST(request: Request) {
         .eq("id", instance.child_id);
       advancedToPhaseNumber = nextPhase.phase_number;
     }
-    // If there is no next phase, the child has completed the final phase (12);
-    // no phase_history row is written and the child stays put.
+    if (!nextPhase) {
+      // The final phase (12) is graduated: no phase transition exists, so no
+      // phase_history row — the completion is recorded as a child-state fact
+      // (set once) and celebrated by the runner.
+      programmeComplete = true;
+      await admin
+        .from("children")
+        .update({ programme_completed_at: completedAt })
+        .eq("id", instance.child_id)
+        .is("programme_completed_at", null);
+    }
   }
 
   // 6. Age-Bracket Transition — evaluate only when the child is NOT graduating
@@ -262,6 +272,7 @@ export async function POST(request: Request) {
     score_percent: score,
     advancesPhase: decision.advancesPhase,
     advancedToPhaseNumber,
+    programmeComplete,
     consecutivePasses: decision.consecutivePasses,
     reason: decision.reason,
     ageBracket,

@@ -12,6 +12,7 @@ import {
   renderMilestone,
   renderRetakeSuggestion,
   renderSessionReminder,
+  renderReassessmentDue,
   renderEncouragement,
 } from "./templates";
 
@@ -20,6 +21,7 @@ export type NotificationType =
   | "session_reminder"
   | "milestone"
   | "retake_suggestion"
+  | "reassessment_due"
   | "encouragement";
 
 export interface PlannedNotification {
@@ -52,6 +54,9 @@ export interface PlannerContext {
   children: PlannerChild[];
   pendingMilestones: PendingEvent[];
   pendingRetakes: PendingEvent[];
+  /** Assessments whose suggested reassessment interval has elapsed (id =
+   *  assessment id → nudged at most once per assessment, ever). */
+  pendingReassessments: PendingEvent[];
   /** Encouragement line pre-selected by the caller (rotated by period). */
   encouragementLine: string;
   /** Stable per-period bucket string (e.g. "d20301" / "w2901") for reminder +
@@ -87,6 +92,12 @@ export function planNotifications(ctx: PlannerContext): PlannedNotification[] {
   for (const rk of ctx.pendingRetakes) {
     const r = renderRetakeSuggestion(rk.childName);
     out.push({ type: "retake_suggestion", dedupeKey: `retake:${rk.id}`, childId: rk.childId, ...r });
+  }
+
+  // Reassessment check-ins — once per elapsed assessment (§11 nudge).
+  for (const ra of ctx.pendingReassessments) {
+    const r = renderReassessmentDue(ra.childName);
+    out.push({ type: "reassessment_due", dedupeKey: `reassess:${ra.id}`, childId: ra.childId, ...r });
   }
 
   // Session reminders — one per stale child per period.

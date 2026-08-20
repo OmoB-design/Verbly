@@ -42,6 +42,7 @@ interface CompletePayload {
   score_percent: number;
   advancesPhase: boolean;
   advancedToPhaseNumber: number | null;
+  programmeComplete?: boolean;
   consecutivePasses: number;
   reason: string;
   ageBracket: { transitioned?: boolean } | null;
@@ -677,25 +678,37 @@ export function SessionRunner({
   // done
   const r = result!;
   const graduated = r.outcome === "advance" && r.advancesPhase && r.advancedToPhaseNumber !== null;
+  const finishedProgramme = r.programmeComplete === true;
   const outcomeCopy =
     r.outcome === "advance"
-      ? graduated
-        ? `A lovely session — and a milestone: ${childName} is moving on to Phase ${r.advancedToPhaseNumber}! 🎉`
-        : `A lovely session. Keep this rhythm going — every session builds on the last.`
+      ? finishedProgramme
+        ? `${childName} has completed every phase of the programme — all twelve. What you've both built, session by session, is extraordinary. 🎉`
+        : graduated
+          ? `A lovely session — and a milestone: ${childName} is moving on to Phase ${r.advancedToPhaseNumber}! 🎉`
+          : `A lovely session. Keep this rhythm going — every session builds on the last.`
       : r.outcome === "retake"
         ? `Good practice today. This one's worth another go soon — repetition is exactly how these skills grow.`
         : `Good effort today. Next time we'll use a gentler version of this activity so ${childName} can build up to it.`;
 
   return (
     <div className="flex flex-col gap-4">
-      {graduated ? <Celebration /> : null}
+      {graduated || finishedProgramme ? <Celebration /> : null}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">{graduated ? "A new phase begins!" : "Session complete"}</CardTitle>
+          <CardTitle className="text-xl">
+            {finishedProgramme ? "The whole journey — complete!" : graduated ? "A new phase begins!" : "Session complete"}
+          </CardTitle>
           <CardDescription>{outcomeCopy}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {graduated ? <PhaseArt phase={r.advancedToPhaseNumber!} priority /> : null}
+          {finishedProgramme ? (
+            <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-foreground/80">
+              Every activity stays available to revisit whenever practice feels good — and your SLP can see the whole
+              journey. This is also a natural moment to retake the Communication Compass and see how far{" "}
+              {childName} has come.
+            </p>
+          ) : null}
           {r.outcome === "advance" && !graduated ? (
             <GrowthMeter value={Math.min(r.consecutivePasses ?? 0, 3)} phase={start?.phase_number ?? 0} />
           ) : null}
