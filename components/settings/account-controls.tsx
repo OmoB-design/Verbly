@@ -12,14 +12,14 @@ import { Modal } from "@/components/ui/modal";
 /** Download-my-data + delete-account (settings → Data & privacy / Account). */
 
 export function DownloadDataButton() {
-  const [busy, setBusy] = React.useState(false);
+  const [busy, setBusy] = React.useState<"pdf" | "json" | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  async function download() {
-    setBusy(true);
+  async function download(format: "pdf" | "json") {
+    setBusy(format);
     setError(null);
     try {
-      const res = await fetch("/api/export");
+      const res = await fetch(`/api/export?format=${format}`);
       if (!res.ok) {
         setError("Couldn't prepare the export — please try again.");
         return;
@@ -28,7 +28,7 @@ export function DownloadDataButton() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `verbly-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `verbly-export-${new Date().toISOString().slice(0, 10)}.${format}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -36,17 +36,25 @@ export function DownloadDataButton() {
     } catch {
       setError("Couldn't prepare the export — please try again.");
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <div>
-        <Button variant="outline" size="sm" onClick={download} disabled={busy}>
-          {busy ? "Preparing…" : "Download my data"}
+        <Button variant="outline" size="sm" onClick={() => download("pdf")} disabled={busy !== null}>
+          {busy === "pdf" ? "Preparing…" : "Download my data (PDF)"}
         </Button>
       </div>
+      <button
+        type="button"
+        onClick={() => download("json")}
+        disabled={busy !== null}
+        className="text-muted-foreground hover:text-foreground self-start text-xs underline underline-offset-4 disabled:opacity-50"
+      >
+        {busy === "json" ? "Preparing…" : "Also available as raw data (.json)"}
+      </button>
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
     </div>
   );
@@ -83,7 +91,7 @@ export function DeleteAccountCard({ email }: { email: string }) {
       <CardHeader>
         <CardTitle className="text-base">Delete my account</CardTitle>
         <CardDescription>
-          Leaving is always your right — including as a research participant, without penalty. This permanently removes
+          Leaving is always your right. This permanently removes
           your account, every child profile, all assessments and session history, professional notes, and voice
           recordings. It cannot be undone. Consider downloading your data first.
         </CardDescription>

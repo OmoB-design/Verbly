@@ -48,7 +48,7 @@ export default async function SettingsPage() {
     for (const p of phases ?? []) phaseNumById.set(p.id, p.phase_number);
   }
 
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "verblyapp@gmail.com";
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -239,16 +239,12 @@ export default async function SettingsPage() {
             App version 0.1.0 · Curriculum {CURRICULUM_VERSION} · Compass {COMPASS_SCHEMA_VERSION} · Readiness{" "}
             {READINESS_SCHEMA_VERSION}
           </p>
-          {contactEmail ? (
-            <p className="text-xs">
-              Questions or feedback:{" "}
-              <a href={`mailto:${contactEmail}`} className="text-primary underline-offset-4 hover:underline">
-                {contactEmail}
-              </a>
-            </p>
-          ) : (
-            <p className="text-xs">Questions or feedback: contact your research coordinator.</p>
-          )}
+          <p className="text-xs">
+            Questions or feedback: contact us at{" "}
+            <a href={`mailto:${contactEmail}`} className="text-primary underline-offset-4 hover:underline">
+              {contactEmail}
+            </a>
+          </p>
         </CardContent>
       </Card>
     </div>

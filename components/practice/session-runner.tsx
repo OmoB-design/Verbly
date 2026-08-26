@@ -98,6 +98,7 @@ export function SessionRunner({
 
   const script = start?.script ?? null;
   const totalCheckins = script?.checkin.count ?? 0;
+  const minCheckinsToEnd = Math.ceil(totalCheckins / 2);
 
   // Text-reduction ruling: the brief shows the overview's FIRST sentence; the
   // remainder folds into "Tips for this session". Content itself is untouched.
@@ -652,7 +653,10 @@ export function SessionRunner({
             sounds to be documented as they happen (esp. Phases 9–12). */}
         <SoundCapture childId={childId} childName={childName} sessionInstanceId={start!.session_instance_id} />
 
-        {checkinIdx > 0 ? (
+        {/* Owner ruling: ending early is only offered once HALF the check-ins
+            are in — one check-in must never become the whole session's score.
+            /sessions/complete enforces the same minimum server-side. */}
+        {checkinIdx >= minCheckinsToEnd ? (
           <button
             type="button"
             onClick={complete}
@@ -660,6 +664,10 @@ export function SessionRunner({
           >
             End the session here
           </button>
+        ) : checkinIdx > 0 ? (
+          <p className="text-xs text-muted-foreground">
+            You can end early after {minCheckinsToEnd} check-ins ({checkinIdx} so far).
+          </p>
         ) : null}
       </div>
     );

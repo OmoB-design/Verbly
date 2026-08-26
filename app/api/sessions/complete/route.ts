@@ -116,15 +116,36 @@ export async function POST(request: Request) {
   });
   const score = scoreSessionPercent(trials);
 
-  // 2. Resolve the current session's phase.
+  // 2. Resolve the current session's phase (+ its script, for the minimum
+  //    check-in rule below).
   const { data: curSession, error: curErr } = await admin
     .schema("curriculum_content")
     .from("sessions")
-    .select("id, phase_number, phase_id")
+    .select("id, phase_number, phase_id, content_json")
     .eq("id", instance.session_id)
     .single();
   if (curErr) return NextResponse.json({ error: curErr.message }, { status: 500 });
   const currentPhaseNumber = curSession.phase_number;
+
+  // Owner ruling: a session can only be scored once at least HALF of its
+  // planned check-ins are recorded — a single tap must never stand in for a
+  // whole session. The runner hides "end early" until then; this is the
+  // server-side guarantee. The instance simply stays unfinished (422).
+  const plannedCount = (() => {
+    const cj = curSession.content_json as { checkin?: { count?: number }; simplified?: { checkin?: { count?: number } } } | null;
+    const variant = instance.ran_simplified ? cj?.simplified : cj;
+    return typeof variant?.checkin?.count === "number" ? variant.checkin.count : 0;
+  })();
+  const minCheckins = Math.ceil(plannedCount / 2);
+  if ((checkins ?? []).length < minCheckins) {
+    return NextResponse.json(
+      {
+        error: `At least ${minCheckins} check-ins are needed before this session can be scored (${(checkins ?? []).length} so far).`,
+        code: "insufficient_checkins",
+      },
+      { status: 422 },
+    );
+  }
 
   // 3. Assemble history for the decision.
   const { data: history, error: histErr } = await admin
