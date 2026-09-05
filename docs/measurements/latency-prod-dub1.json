@@ -1,0 +1,32 @@
+{
+  "base": "https://verbly-orcin.vercel.app",
+  "cycles": 10,
+  "planned_checkins": 20,
+  "checkins_recorded_per_session": 10,
+  "start": {
+    "p50_ms": 579,
+    "p95_ms": 905.6,
+    "bytes": 1911
+  },
+  "complete": {
+    "p50_ms": 715.2,
+    "p95_ms": 1553.1,
+    "bytes": 554
+  },
+  "checkin_sync": {
+    "ms": 171.2,
+    "request_bytes": 135,
+    "response_bytes": 0,
+    "status": 201
+  },
+  "compass_start": {
+    "ms": 652.4,
+    "bytes": 5815
+  },
+  "compass_score": {
+    "ms": 656.6,
+    "request_bytes": 666,
+    "bytes": 1357,
+    "status": 200
+  }
+}

@@ -118,3 +118,20 @@ Age-Bracket Transition three-gate evaluation, persisting gate outcomes to
 `age_gate_evaluation`; (6) computes the downward advisory (advisory-only) and
 persists it. Responses include `programmeComplete`, `consecutivePasses`,
 `ageBracket`, `downwardAdvisory`.
+
+## Addendum (2026-09-05, second pass): round-trip discipline in the session routes
+
+The logical order above is unchanged, but *reads that don't depend on each
+other's results now run in parallel batches* (each sequential `await` against
+Supabase is a full network round trip): `/sessions/start` runs auth, the RLS
+child read, the content read, the last-attempt read and the assessment read as
+one batch (2 round trips on the common path, was 6); `/sessions/complete` runs
+3 batches + phase-map + writes (7 round trips on the common path, was ~14),
+and its two instrumentation writes (`age_gate_evaluation`,
+`downward_advisory`) are one merged update. Ordering that carries meaning is
+still strictly sequential: the outcome write lands before the age-bracket
+evaluation (whose window includes the closing session), and `phase_history`
+is written before `children.current_phase_id` moves. Functions are pinned to
+`dub1` (vercel.json `regions`) — the same region as the database — which is
+the other half of the latency fix; measured effect isolation is in
+`docs/measurements/MEASUREMENTS.md`.
