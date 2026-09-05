@@ -139,3 +139,17 @@ Global rule for all 12 phases (see `README.md`): **75% pass mark across 3 consec
 - **Not every phase's data shape is "one score per session."** Phase 4's prompt-fading log, Phase 11's communication-method log, and Phase 12's shaping-curve tracking are all richer, phase-specific structures layered on top of the basic session score — `DATABASE.md` should treat these as phase-specific extension tables, not force them into one generic `session_score` column.
 - **Age variance is not uniform in depth.** Some phases only vary game *content* by age (Phase 1); Phase 10 varies both content and the fading target itself. The content schema needs to support both shapes.
 - **Two mechanisms exist for "child isn't succeeding" and they are not the same thing:** Phase 6's in-trial 4-step error-correction procedure (a recovery loop within a single trial) is distinct from the universal between-session retake → Simplified Session flow. Don't conflate them in the state machine design.
+
+## Addendum (2026-09-05): Scoring Reference implementation status
+
+All Scoring-Appendix mechanisms are implemented and content-driven: the 5-level
+base support scale (100/75/50/25/0) and the exception scales (Picture
+Discrimination accuracy+self-correct, Responsive Requesting latency,
+Turn-Taking behavioural compliance) live in each session's versioned check-in
+options; the three per-trial bonuses — Attribute Expansion (+10 cap 100),
+Correct Stem Selection (+10 cap 100 / −10 floor 50, multi-stem only), Closer
+Approximation (+10 on imitated-vocal trials exceeding the rolling most-frequent
+step of the last 5 attempts, computed server-side) — are applied in
+`lib/engine/scoring.ts` at `/api/sessions/complete`. Simplified-session passes
+count toward the 3-consecutive run but the graduating pass must be standard
+(owner ruling 2026-08-09).

@@ -772,7 +772,7 @@ function ChoiceButton({
       aria-pressed={selected}
       onClick={onClick}
       className={
-        `rounded-lg border text-left text-sm transition-colors ${small ? "px-3 py-2" : "w-full px-4 py-3"} ` +
+        `rounded-lg border text-left text-sm transition-colors ${small ? "min-h-11 px-3 py-2" : "min-h-11 w-full px-4 py-3"} ` +
         (selected ? "border-primary bg-primary/5 ring-primary/30 ring-1" : "border-input hover:bg-muted/50")
       }
     >

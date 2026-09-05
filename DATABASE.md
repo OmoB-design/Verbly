@@ -190,3 +190,13 @@ Both follow the same rule: **bump on edit, pin at the point of use, never rewrit
 - RLS on every child-scoped table: a caregiver's queries are restricted to children they own (`primary_caregiver_id` or a `secondary` role grant); an SLP's queries are restricted to children present in `slp_child_links` for their `slp_id`.
 - Tier 1 data (name, diagnosis notes, audio, assessment responses, session performance) gets audit logging on read once the SLP role is active — worth being able to answer "who looked at this child's data, when."
 - Deletion is one cascade (`children` → `session_instances` → `session_checkins`/extension tables → `phase_history` → `assessments` → storage objects), tested explicitly rather than assumed to work because foreign keys exist.
+
+## Addendum (2026-09-05): evaluation-instrumentation columns
+
+- `session_instances.age_gate_evaluation` (jsonb, migration 023) — the
+  Age-Bracket Transition gate outcomes for the evaluation run at this
+  session's completion: `{ gates: {g1Mean, g2TopTier, g3NoRetakes},
+  transitioned, blockedByCooldown, blockedByAgeFloor, windowSize }`. Null when
+  no evaluation applied. Feeds the §13.5 threshold-validation trigger.
+- `session_instances.downward_advisory` (jsonb, migration 017) — advisory-only
+  per-activity drop detection: `{ advise, reason, baseline, recent }`.

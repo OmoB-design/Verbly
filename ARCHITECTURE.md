@@ -118,3 +118,18 @@ SLP access is a **separate, optional** layer on top of that: an SLP's read-only 
 Not yet resolved — flag rather than assume if these come up during implementation:
 
 - **Analytics/error monitoring vendor** — still undecided per `DEPENDENCIES.md`; must respect the Tier 1/2/3 data classification once chosen.
+
+## Addendum (2026-09-05): Age-Bracket Transition — three-gate rule
+
+The Age-Bracket Transition Rule is evaluated inside `POST /api/sessions/complete`
+(no separate function/endpoint) after every non-graduating session completion:
+window = the child's last 3 completed sessions in their current bracket;
+**Gate 1** mean score ≥ 85%; **Gate 2** ≥ 70% top-tier (unprompted, credit 100)
+check-ins in *every* window session; **Gate 3** zero retakes in the window.
+All three must pass, plus the chronological age floor (§13.4: 84/108 months)
+and a 3-session cooldown. Pure rule: `lib/engine/age-bracket.ts`; DB assembly:
+`lib/engine/age-bracket-runtime.ts`. Every evaluation's gate outcomes are
+persisted to `session_instances.age_gate_evaluation` (migration 023) so the
+§13.5 threshold-validation trigger — "revisit thresholds if none of the first
+50 children clear all three gates" — is computable from data. Downward moves
+are advisory-only (`downward_advisory` on the instance), never automatic.

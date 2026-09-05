@@ -102,3 +102,19 @@ Handled by Supabase Auth directly (signup, login, password reset with single-use
 
 - **No endpoint lets a client submit a `score_percent` or `recommended_phase` directly** — these are always server-computed, per the philosophy at the top of this file.
 - **No content-editing endpoints.** Curriculum and Compass content updates are seeded from reviewed content files (see `CLAUDE.md`, `CONTRIBUTING.md`), not edited through the API at runtime.
+
+## Addendum (2026-09-05): /api/sessions/complete internal logic
+
+`POST /api/sessions/complete` is the single server-authoritative close of a
+session. In order: (1) refuses to score below HALF the session's planned
+check-ins (422 `insufficient_checkins`; owner ruling — one tap can never be a
+session's score); (2) computes `score_percent` from recorded check-ins with
+Scoring-Appendix §3 bonuses (attribute / stem / approximation incl. 5-attempt
+rolling baseline); (3) applies the advancement rule (75% × 3 consecutive;
+simplified passes count in the run but cannot graduate); (4) on graduation
+writes `phase_history` (`rl_advance`) and moves the child — or records
+programme completion on Phase 12; (5) on non-graduating completions runs the
+Age-Bracket Transition three-gate evaluation, persisting gate outcomes to
+`age_gate_evaluation`; (6) computes the downward advisory (advisory-only) and
+persists it. Responses include `programmeComplete`, `consecutivePasses`,
+`ageBracket`, `downwardAdvisory`.

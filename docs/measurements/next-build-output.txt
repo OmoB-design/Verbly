@@ -1,0 +1,79 @@
+
+> verbly@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.21
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (106kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (254kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully in 30.1s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/30) ...
+   Generating static pages (7/30) 
+   Generating static pages (14/30) 
+   Generating static pages (22/30) 
+ ✓ Generating static pages (30/30)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                      Size  First Load JS
+┌ ○ /                                           189 B         111 kB
+├ ○ /_not-found                                 202 B         103 kB
+├ ƒ /api/account                                202 B         103 kB
+├ ƒ /api/ask-verbly/[child_id]                  202 B         103 kB
+├ ƒ /api/children/[id]                          202 B         103 kB
+├ ƒ /api/compass/[assessment_id]/override       202 B         103 kB
+├ ƒ /api/compass/[assessment_id]/resume-link    202 B         103 kB
+├ ƒ /api/compass/[assessment_id]/save           202 B         103 kB
+├ ƒ /api/compass/[assessment_id]/score          202 B         103 kB
+├ ƒ /api/compass/result/[child_id]              202 B         103 kB
+├ ƒ /api/compass/start                          202 B         103 kB
+├ ƒ /api/cron/notifications                     202 B         103 kB
+├ ƒ /api/export                                 202 B         103 kB
+├ ƒ /api/phase-history/regress                  202 B         103 kB
+├ ƒ /api/readiness/[assessment_id]/submit       202 B         103 kB
+├ ƒ /api/sessions/complete                      202 B         103 kB
+├ ƒ /api/sessions/start                         202 B         103 kB
+├ ƒ /api/slp-links/accept                       202 B         103 kB
+├ ƒ /api/slp-links/invite                       202 B         103 kB
+├ ƒ /api/slp-links/invite-email                 202 B         103 kB
+├ ƒ /api/slp-links/revoke                       202 B         103 kB
+├ ƒ /api/slp-notes                              202 B         103 kB
+├ ƒ /api/vocalization-logs                      202 B         103 kB
+├ ƒ /api/vocalization-logs/[id]/audio-url       202 B         103 kB
+├ ƒ /auth/confirm                               202 B         103 kB
+├ ƒ /auth/signout                               202 B         103 kB
+├ ƒ /chat                                     3.63 kB         116 kB
+├ ƒ /children/[id]                             4.1 kB         125 kB
+├ ƒ /children/[id]/compass                     7.7 kB         134 kB
+├ ƒ /children/[id]/edit                       5.93 kB         132 kB
+├ ƒ /children/[id]/practice                    2.2 kB         123 kB
+├ ƒ /children/[id]/practice/[session_id]      78.5 kB         199 kB
+├ ƒ /children/[id]/progress                     189 B         111 kB
+├ ƒ /children/[id]/sessions                     189 B         111 kB
+├ ƒ /children/new                             2.43 kB         118 kB
+├ ƒ /dashboard                                  189 B         111 kB
+├ ○ /forgot-password                          2.34 kB         118 kB
+├ ○ /icon.svg                                     0 B            0 B
+├ ƒ /invite/[token]                            1.4 kB         117 kB
+├ ○ /login                                    3.42 kB         119 kB
+├ ○ /reset-password                           2.15 kB         114 kB
+├ ƒ /settings                                 3.31 kB         124 kB
+├ ○ /signup                                     276 B         119 kB
+├ ○ /signup/slp                                 279 B         119 kB
+├ ƒ /slp                                        189 B         111 kB
+└ ƒ /slp/children/[id]                        2.43 kB         123 kB
++ First Load JS shared by all                  102 kB
+  ├ chunks/1255-612df69cb02f2021.js           46.3 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js       54.2 kB
+  └ other shared chunks (total)               1.93 kB
+
+
+ƒ Middleware                                  91.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -68,3 +68,15 @@ This project is very likely subject to **COPPA** (US, children's data) and **GDP
 ## Open questions to resolve before this file is complete
 
 - Whether analytics/error-monitoring are needed at all for a dissertation-scope build, or deferred until a post-dissertation phase
+
+## Rules-engine note (evaluation item 1, verified 2026-09-05)
+
+`json-rules-engine` is **not** in this build — not in `package.json` nor the
+lockfile — and never was. The content-decoupling contribution is delivered by
+the **versioned JSON content architecture that is actually built**: RL behavior
+scripts, scoring scales, bonus definitions, Compass item bank/weights/tree
+thresholds, and readiness checks all live as versioned content records
+(`curriculum_content.*`, `compass_content`, `readiness_content`), executed by
+small hand-written deterministic engines (`lib/engine/*`, `lib/compass/*`,
+median cyclomatic complexity M = 2 — see docs/measurements/). Contribution
+framing should reference this architecture, not a rules-engine library.

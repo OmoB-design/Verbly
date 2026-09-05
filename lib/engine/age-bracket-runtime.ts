@@ -22,6 +22,12 @@ export interface AgeBracketResult {
   transitioned: boolean;
   toAgeBracket?: AgeBracket;
   blockedByAgeFloor?: boolean;
+  /** §13.5 instrumentation: the three gate outcomes + cooldown state for this
+   *  evaluation, persisted by the caller so the threshold-validation trigger
+   *  can be computed over real data. */
+  gates?: { g1Mean: boolean; g2TopTier: boolean; g3NoRetakes: boolean };
+  blockedByCooldown?: boolean;
+  windowSize?: number;
   reason: string;
 }
 
@@ -147,6 +153,9 @@ export async function runAgeBracketEvaluation(
       evaluated: true,
       transitioned: false,
       blockedByAgeFloor: decision.blockedByAgeFloor,
+      gates: decision.gates,
+      blockedByCooldown: decision.blockedByCooldown,
+      windowSize: windowSessions.length,
       reason: decision.reason,
     };
   }
@@ -180,6 +189,9 @@ export async function runAgeBracketEvaluation(
     evaluated: true,
     transitioned: true,
     toAgeBracket: nextBracket,
+    gates: decision.gates,
+    blockedByCooldown: false,
+    windowSize: windowSessions.length,
     reason: decision.reason,
   };
 }

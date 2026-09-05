@@ -1,0 +1,227 @@
+/Users/owner/Verbly/lib/compass/assess.ts
+  21:8  warning  Function 'assess' has a complexity of 6. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/compass/compass.test.ts
+   26:60  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   32:41  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   33:70  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   43:31  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   50:52  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   51:65  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   56:58  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   57:41  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   64:61  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   65:37  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   68:74  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   71:63  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   75:77  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   87:62  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   88:59  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   90:75  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   93:97  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   98:99  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  105:81  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  107:73  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  122:69  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  136:29  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  138:80  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  147:57  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  159:52  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  168:54  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  169:90  warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+  180:77  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  200:74  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/compass/config.ts
+  29:52  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/compass/contract.ts
+  26:8  warning  Function 'assignBracket' has a complexity of 5. Maximum allowed is 0  complexity
+  56:8  warning  Function 'phaseName' has a complexity of 2. Maximum allowed is 0      complexity
+/Users/owner/Verbly/lib/compass/load-config.ts
+  12:8  warning  Async function 'loadCompassConfig' has a complexity of 3. Maximum allowed is 0  complexity
+  24:8  warning  Function 'ageInMonths' has a complexity of 3. Maximum allowed is 0              complexity
+/Users/owner/Verbly/lib/compass/phase-mapper.ts
+   16:57  warning  Arrow function has a complexity of 2. Maximum allowed is 0                   complexity
+   17:61  warning  Arrow function has a complexity of 3. Maximum allowed is 0                   complexity
+   32:1   warning  Function 'elseNearestPhase' has a complexity of 2. Maximum allowed is 0      complexity
+   53:26  warning  Arrow function has a complexity of 2. Maximum allowed is 0                   complexity
+   58:8   warning  Function 'mapPhase' has a complexity of 19. Maximum allowed is 0             complexity
+   89:50  warning  Arrow function has a complexity of 2. Maximum allowed is 0                   complexity
+   97:8   warning  Function 'computePlacementMode' has a complexity of 3. Maximum allowed is 0  complexity
+  107:43  warning  Arrow function has a complexity of 4. Maximum allowed is 0                   complexity
+  111:8   warning  Function 'buildReasoning' has a complexity of 3. Maximum allowed is 0        complexity
+/Users/owner/Verbly/lib/compass/red-flags.ts
+  11:8   warning  Function 'computeOralMotorFlags' has a complexity of 7. Maximum allowed is 0  complexity
+  35:8   warning  Function 'detectRedFlags' has a complexity of 8. Maximum allowed is 0         complexity
+  54:33  warning  Arrow function has a complexity of 1. Maximum allowed is 0                    complexity
+/Users/owner/Verbly/lib/compass/scoring.ts
+   18:8   warning  Function 'computeDomainScores' has a complexity of 7. Maximum allowed is 0    complexity
+   25:12  warning  Arrow function has a complexity of 3. Maximum allowed is 0                    complexity
+   48:8   warning  Function 'computeOverall' has a complexity of 2. Maximum allowed is 0         complexity
+   60:8   warning  Function 'benchmarkAgreement' has a complexity of 9. Maximum allowed is 0     complexity
+   66:9   warning  Arrow function has a complexity of 2. Maximum allowed is 0                    complexity
+   94:8   warning  Function 'computeConfidence' has a complexity of 5. Maximum allowed is 0      complexity
+  118:8   warning  Function 'extractStrengthsNeeds' has a complexity of 1. Maximum allowed is 0  complexity
+  124:17  warning  Arrow function has a complexity of 1. Maximum allowed is 0                    complexity
+  125:18  warning  Arrow function has a complexity of 1. Maximum allowed is 0                    complexity
+  128:17  warning  Arrow function has a complexity of 1. Maximum allowed is 0                    complexity
+  129:18  warning  Arrow function has a complexity of 1. Maximum allowed is 0                    complexity
+/Users/owner/Verbly/lib/compass/ui-copy.ts
+  32:8  warning  Function 'domainLabel' has a complexity of 3. Maximum allowed is 0            complexity
+  44:8  warning  Function 'referralMessage' has a complexity of 1. Maximum allowed is 0        complexity
+  49:8  warning  Function 'startingPhaseHeadline' has a complexity of 1. Maximum allowed is 0  complexity
+  65:8  warning  Function 'placementModeCopy' has a complexity of 2. Maximum allowed is 0      complexity
+  72:8  warning  Function 'simplifiedCopy' has a complexity of 1. Maximum allowed is 0         complexity
+  77:8  warning  Function 'twoAdultCopy' has a complexity of 1. Maximum allowed is 0           complexity
+/Users/owner/Verbly/lib/engine/advancement.test.ts
+   10:36   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   11:55   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   15:54   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   19:41   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   26:62   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   27:69   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   38:80   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   49:54   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   59:42   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   70:85   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   80:43   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   91:67   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   92:45   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   96:52   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  105:44   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  115:101  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  116:103  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  129:90   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  140:82   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  152:99   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  162:62   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/engine/advancement.ts
+   69:8   warning  Function 'computeScorePercent' has a complexity of 2. Maximum allowed is 0  complexity
+   71:40  warning  Arrow function has a complexity of 1. Maximum allowed is 0                  complexity
+  110:8   warning  Function 'decideAdvancement' has a complexity of 8. Maximum allowed is 0    complexity
+  158:8   warning  Function 'nextRetakeSessionId' has a complexity of 2. Maximum allowed is 0  complexity
+  163:12  warning  Arrow function has a complexity of 2. Maximum allowed is 0                  complexity
+/Users/owner/Verbly/lib/engine/age-bracket-runtime.ts
+   34:1   warning  Function 'ageInMonths' has a complexity of 2. Maximum allowed is 0                     complexity
+   41:1   warning  Function 'isBracket' has a complexity of 2. Maximum allowed is 0                       complexity
+   59:8   warning  Async function 'runAgeBracketEvaluation' has a complexity of 24. Maximum allowed is 0  complexity
+  100:47  warning  Arrow function has a complexity of 1. Maximum allowed is 0                             complexity
+  118:70  warning  Arrow function has a complexity of 3. Maximum allowed is 0                             complexity
+/Users/owner/Verbly/lib/engine/age-bracket.test.ts
+   17:60  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   18:80  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   24:41  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   33:75  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   47:62  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   56:78  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   63:35  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   69:52  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   74:44  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   80:71  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   81:85  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   90:50  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   94:58  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  103:65  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/engine/age-bracket.ts
+   61:8   warning  Function 'evaluateAgeBracketTransition' has a complexity of 8. Maximum allowed is 0  complexity
+   77:32  warning  Arrow function has a complexity of 1. Maximum allowed is 0                           complexity
+   79:33  warning  Arrow function has a complexity of 1. Maximum allowed is 0                           complexity
+   80:35  warning  Arrow function has a complexity of 1. Maximum allowed is 0                           complexity
+  112:8   warning  Function 'evaluateDownwardAdvisory' has a complexity of 4. Maximum allowed is 0      complexity
+  120:39  warning  Arrow function has a complexity of 1. Maximum allowed is 0                           complexity
+/Users/owner/Verbly/lib/engine/progression.test.ts
+   13:79   warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+   18:67   warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+   24:68   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   27:37   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   28:33   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   36:44   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   43:65   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   48:63   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   55:62   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   60:65   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   66:30   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   67:72   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   74:67   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   82:31   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   83:60   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   88:78   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   97:74   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   98:47   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  102:55   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  107:50   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  113:69   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  114:93   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  121:71   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  127:81   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  133:74   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  139:83   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  141:119  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  154:93   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  160:93   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  171:75   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  177:81   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  182:46   warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/engine/progression.ts
+   95:1   warning  Function 'scoreOf' has a complexity of 5. Maximum allowed is 0                     complexity
+  109:8   warning  Function 'calculateProgressionState' has a complexity of 10. Maximum allowed is 0  complexity
+  116:53  warning  Arrow function has a complexity of 1. Maximum allowed is 0                         complexity
+  133:13  warning  Arrow function has a complexity of 2. Maximum allowed is 0                         complexity
+/Users/owner/Verbly/lib/engine/scoring.test.ts
+   5:42  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+   6:53  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  11:49  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  16:55  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  17:64  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  21:47  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  26:58  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  27:39  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  32:84  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  42:52  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  43:68  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  46:73  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  49:76  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  55:36  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  56:51  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  65:43  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  70:36  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  71:79  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  74:67  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  77:47  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  81:62  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/engine/scoring.ts
+  37:8   warning  Function 'applyBonus' has a complexity of 10. Maximum allowed is 0          complexity
+  72:8   warning  Function 'scoreSessionPercent' has a complexity of 2. Maximum allowed is 0  complexity
+  74:38  warning  Arrow function has a complexity of 1. Maximum allowed is 0                  complexity
+  87:8   warning  Function 'rollingBaselineStep' has a complexity of 8. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/engine/session-script.ts
+   87:1   warning  Function 'isOption' has a complexity of 7. Maximum allowed is 0            complexity
+   99:1   warning  Function 'isVariant' has a complexity of 19. Maximum allowed is 0          complexity
+  103:51  warning  Arrow function has a complexity of 4. Maximum allowed is 0                 complexity
+  122:8   warning  Function 'parseSessionScript' has a complexity of 9. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/readiness/score.test.ts
+   9:49  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  10:55  warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+  11:35  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  12:30  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  13:34  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  14:34  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  16:76  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  17:59  warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+  18:48  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  19:41  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  24:66  warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+  26:33  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  31:62  warning  Arrow function has a complexity of 2. Maximum allowed is 0  complexity
+  32:57  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  32:76  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  35:30  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  38:63  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  39:54  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  40:31  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  45:53  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  46:40  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  51:47  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  56:81  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  62:80  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+  67:46  warning  Arrow function has a complexity of 1. Maximum allowed is 0  complexity
+/Users/owner/Verbly/lib/readiness/score.ts
+  22:8  warning  Function 'scoreReadiness' has a complexity of 7. Maximum allowed is 0  complexity

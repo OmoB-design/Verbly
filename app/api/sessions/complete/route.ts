@@ -255,6 +255,23 @@ export async function POST(request: Request) {
     } catch (e) {
       ageBracket = { evaluated: false, transitioned: false, error: e instanceof Error ? e.message : String(e) };
     }
+    // §13.5: persist the gate outcomes so the threshold-validation trigger
+    // ("revisit if none of the first 50 children clear all 3 gates") can be
+    // computed from data. Non-fatal — the outcome is already saved.
+    if (ageBracket && "evaluated" in ageBracket && ageBracket.evaluated) {
+      await admin
+        .from("session_instances")
+        .update({
+          age_gate_evaluation: {
+            gates: ageBracket.gates ?? null,
+            transitioned: ageBracket.transitioned,
+            blockedByCooldown: ageBracket.blockedByCooldown ?? false,
+            blockedByAgeFloor: ageBracket.blockedByAgeFloor ?? false,
+            windowSize: ageBracket.windowSize ?? 0,
+          },
+        })
+        .eq("id", sessionInstanceId);
+    }
   }
 
   // 7. Downward advisory (advisory-only — never moves the variant). Fires on a
