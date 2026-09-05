@@ -19,12 +19,6 @@ import { parseSessionScript } from "@/lib/engine/session-script";
  */
 export async function POST(request: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
 
   let body: { child_id?: string; session_id?: string };
   try {
@@ -40,13 +34,65 @@ export async function POST(request: Request) {
     );
   }
 
+  const admin = createAdminClient();
+
+  // All five reads key off the request body alone, so they run as ONE parallel
+  // batch instead of five sequential cross-region round trips: auth check, RLS
+  // child authorization, content read, last completed attempt (Simplified
+  // gate), latest scored assessment (readiness gate). The middleware has
+  // already refreshed the session cookie on this request, so the RLS read can
+  // safely race auth.getUser(). Auth/authz are still enforced before anything
+  // is returned or written — the admin reads are server-side only.
+  const [userRes, childRes, sessionRes, lastAttemptRes, assessmentRes] =
+    await Promise.all([
+      supabase.auth.getUser(),
+      supabase
+        .from("children")
+        .select("id, age_bracket")
+        .eq("id", child_id)
+        .maybeSingle(),
+      admin
+        .schema("curriculum_content")
+        .from("sessions")
+        .select("id, phase_number, session_number, age_bracket, content_version, content_json")
+        .eq("id", session_id)
+        .maybeSingle(),
+      admin
+        .from("session_instances")
+        .select("outcome")
+        .eq("child_id", child_id)
+        .eq("session_id", session_id)
+        .not("completed_at", "is", null)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      admin
+        .from("assessments")
+        .select("id, starting_phase, placement_mode")
+        .eq("child_id", child_id)
+        .eq("status", "scored")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+  const user = userRes.data.user;
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   // Authorize: RLS ensures this returns a row only if the caller may access
   // this child.
-  const { data: child, error: childErr } = await supabase
-    .from("children")
-    .select("id, age_bracket")
-    .eq("id", child_id)
-    .maybeSingle();
+  let { data: child, error: childErr } = childRes;
+  if (childErr) {
+    // Rare race: the parallel RLS read may have run on a token getUser() was
+    // refreshing. One sequential retry with the fresh cookie before failing.
+    ({ data: child, error: childErr } = await supabase
+      .from("children")
+      .select("id, age_bracket")
+      .eq("id", child_id)
+      .maybeSingle());
+  }
   if (childErr) {
     return NextResponse.json({ error: childErr.message }, { status: 500 });
   }
@@ -54,15 +100,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Child not found or not accessible" }, { status: 403 });
   }
 
-  const admin = createAdminClient();
-
-  // Resolve the session's pinned content_version + script (server-authoritative).
-  const { data: session, error: sessErr } = await admin
-    .schema("curriculum_content")
-    .from("sessions")
-    .select("id, phase_number, session_number, age_bracket, content_version, content_json")
-    .eq("id", session_id)
-    .maybeSingle();
+  // Resolved in the batch above (server-authoritative content_version).
+  const { data: session, error: sessErr } = sessionRes;
   if (sessErr) {
     return NextResponse.json({ error: sessErr.message }, { status: 500 });
   }
@@ -95,16 +134,7 @@ export async function POST(request: Request) {
   // THIS session ended simplify_triggered and the script provides one.
   let runSimplified = false;
   let simplifiedReason: "retake_support" | "readiness_ease_in" | null = null;
-  const { data: lastAttempt } = await admin
-    .from("session_instances")
-    .select("outcome")
-    .eq("child_id", child_id)
-    .eq("session_id", session_id)
-    .not("completed_at", "is", null)
-    .order("completed_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (lastAttempt?.outcome === "simplify_triggered" && script.simplified) {
+  if (lastAttemptRes.data?.outcome === "simplify_triggered" && script.simplified) {
     runSimplified = true;
     simplifiedReason = "retake_support";
   }
@@ -119,14 +149,7 @@ export async function POST(request: Request) {
   //   • result passed           → standard session (a lone hard-item NO only
   //     shows the keep-an-eye flag, it never changes the variant).
   if (!runSimplified) {
-    const { data: assessment } = await admin
-      .from("assessments")
-      .select("id, starting_phase, placement_mode")
-      .eq("child_id", child_id)
-      .eq("status", "scored")
-      .order("completed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const assessment = assessmentRes.data;
     if (
       assessment?.placement_mode === "readiness_module_first" &&
       assessment.starting_phase === session.phase_number
@@ -137,18 +160,23 @@ export async function POST(request: Request) {
         .select("id")
         .eq("phase_number", session.phase_number);
       const phaseSessionIds = (phaseSessions ?? []).map((s) => s.id as string);
-      const { count } = await admin
-        .from("session_instances")
-        .select("id", { count: "exact", head: true })
-        .eq("child_id", child_id)
-        .not("completed_at", "is", null)
-        .in("session_id", phaseSessionIds);
-      if ((count ?? 0) === 0) {
-        const { data: readiness } = await admin
+      // Independent of each other: the completed-in-phase count and the
+      // readiness result — one parallel pair, not two round trips.
+      const [countRes, readinessRes] = await Promise.all([
+        admin
+          .from("session_instances")
+          .select("id", { count: "exact", head: true })
+          .eq("child_id", child_id)
+          .not("completed_at", "is", null)
+          .in("session_id", phaseSessionIds),
+        admin
           .from("readiness_check_results")
           .select("passed")
           .eq("assessment_id", assessment.id)
-          .maybeSingle();
+          .maybeSingle(),
+      ]);
+      if ((countRes.count ?? 0) === 0) {
+        const readiness = readinessRes.data;
         if (!readiness) {
           return NextResponse.json(
             {

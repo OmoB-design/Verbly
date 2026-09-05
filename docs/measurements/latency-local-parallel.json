@@ -1,0 +1,32 @@
+{
+  "base": "http://localhost:3001",
+  "cycles": 12,
+  "planned_checkins": 20,
+  "checkins_recorded_per_session": 10,
+  "start": {
+    "p50_ms": 647.4,
+    "p95_ms": 1254.4,
+    "bytes": 1852
+  },
+  "complete": {
+    "p50_ms": 1449.7,
+    "p95_ms": 2562,
+    "bytes": 564
+  },
+  "checkin_sync": {
+    "ms": 171.5,
+    "request_bytes": 135,
+    "response_bytes": 0,
+    "status": 201
+  },
+  "compass_start": {
+    "ms": 1138.8,
+    "bytes": 5815
+  },
+  "compass_score": {
+    "ms": 1660.3,
+    "request_bytes": 666,
+    "bytes": 1357,
+    "status": 200
+  }
+}

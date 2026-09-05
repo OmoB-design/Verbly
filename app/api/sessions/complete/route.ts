@@ -27,16 +27,17 @@ import { evaluateDownwardAdvisory } from "@/lib/engine/age-bracket";
  * child's `current_phase_id`. The client can neither compute nor submit the
  * score or outcome (no user write policy exists for these fields).
  *
+ * Round-trip discipline: reads that don't depend on each other's results run
+ * in parallel batches (Supabase is cross-region from the function, so every
+ * sequential await is a full network round trip). Write ORDER is preserved
+ * exactly: outcome before the age-bracket evaluation (whose window includes
+ * this session), and phase_history before children.current_phase_id (the
+ * audit row must exist before the child moves).
+ *
  * Depends on the `curriculum_content` schema being exposed to the API.
  */
 export async function POST(request: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
 
   let body: { session_instance_id?: string };
   try {
@@ -49,12 +50,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "session_instance_id is required" }, { status: 400 });
   }
 
+  const admin = createAdminClient();
+
+  // Batch A — independent: auth check, RLS-authorized instance read, and the
+  // check-ins read (keyed on the id from the body; server-side only, nothing
+  // is returned or written until the auth/authz checks below pass).
+  const [userRes, instRes, ckRes] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("session_instances")
+      .select("id, child_id, session_id, completed_at, ran_simplified")
+      .eq("id", sessionInstanceId)
+      .maybeSingle(),
+    admin
+      .from("session_checkins")
+      .select("credit_value, bonus_kind, bonus_observation")
+      .eq("session_instance_id", sessionInstanceId),
+  ]);
+
+  const user = userRes.data.user;
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   // Authorize via RLS: the caller only sees their own child's instance.
-  const { data: instance, error: instErr } = await supabase
-    .from("session_instances")
-    .select("id, child_id, session_id, completed_at, ran_simplified")
-    .eq("id", sessionInstanceId)
-    .maybeSingle();
+  let { data: instance, error: instErr } = instRes;
+  if (instErr) {
+    // Rare race: the parallel RLS read may have run on a token getUser() was
+    // refreshing. One sequential retry with the fresh cookie before failing.
+    ({ data: instance, error: instErr } = await supabase
+      .from("session_instances")
+      .select("id, child_id, session_id, completed_at, ran_simplified")
+      .eq("id", sessionInstanceId)
+      .maybeSingle());
+  }
   if (instErr) return NextResponse.json({ error: instErr.message }, { status: 500 });
   if (!instance) {
     return NextResponse.json({ error: "Session not found or not accessible" }, { status: 403 });
@@ -63,31 +92,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Session already completed" }, { status: 409 });
   }
 
-  const admin = createAdminClient();
-
-  // 1. Score from recorded check-ins, applying the Scoring-Appendix §3 bonuses
-  //    server-side (base credit + per-trial bonus). See lib/engine/scoring.ts.
-  const { data: checkins, error: ckErr } = await admin
-    .from("session_checkins")
-    .select("credit_value, bonus_kind, bonus_observation")
-    .eq("session_instance_id", sessionInstanceId);
+  const { data: checkins, error: ckErr } = ckRes;
   if (ckErr) return NextResponse.json({ error: ckErr.message }, { status: 500 });
 
-  // Phase 12 (approximation) is history-dependent: gather this child's PRIOR
-  // approximation attempts (excluding this session) to compute each target's
-  // rolling baseline. Interpretation flagged: baseline uses prior sessions
-  // only, not earlier trials within the current session.
+  // Batch B — all keyed on the instance row: the session's content (for phase
+  // + the minimum check-in rule), the child's full completed history (for the
+  // advancement decision), and — only when this session recorded approximation
+  // bonuses — the child's PRIOR approximation attempts (Phase 12 rolling
+  // baseline; prior sessions only, not earlier trials within this session).
+  const needsPriorApprox = (checkins ?? []).some((c) => c.bonus_kind === "approximation");
+  const [curRes, histRes, paRes] = await Promise.all([
+    admin
+      .schema("curriculum_content")
+      .from("sessions")
+      .select("id, phase_number, phase_id, content_json")
+      .eq("id", instance.session_id)
+      .single(),
+    admin
+      .from("session_instances")
+      .select("id, session_id, score_percent, completed_at, ran_simplified")
+      .eq("child_id", instance.child_id)
+      .not("completed_at", "is", null)
+      .order("completed_at", { ascending: true }),
+    needsPriorApprox
+      ? admin
+          .from("session_checkins")
+          .select("bonus_observation, created_at, session_instances!inner(child_id)")
+          .eq("session_instances.child_id", instance.child_id)
+          .eq("bonus_kind", "approximation")
+          .neq("session_instance_id", sessionInstanceId)
+          .order("created_at", { ascending: true })
+      : Promise.resolve({ data: null, error: null }),
+  ]);
+
   const priorStepsByTarget = new Map<string, number[]>();
-  if ((checkins ?? []).some((c) => c.bonus_kind === "approximation")) {
-    const { data: priorApprox, error: paErr } = await admin
-      .from("session_checkins")
-      .select("bonus_observation, created_at, session_instances!inner(child_id)")
-      .eq("session_instances.child_id", instance.child_id)
-      .eq("bonus_kind", "approximation")
-      .neq("session_instance_id", sessionInstanceId)
-      .order("created_at", { ascending: true });
-    if (paErr) return NextResponse.json({ error: paErr.message }, { status: 500 });
-    for (const r of priorApprox ?? []) {
+  if (needsPriorApprox) {
+    if (paRes.error) return NextResponse.json({ error: paRes.error.message }, { status: 500 });
+    for (const r of paRes.data ?? []) {
       const obs = r.bonus_observation as { target?: string; step?: number } | null;
       if (obs && typeof obs.target === "string" && typeof obs.step === "number") {
         const arr = priorStepsByTarget.get(obs.target) ?? [];
@@ -97,6 +138,8 @@ export async function POST(request: Request) {
     }
   }
 
+  // 1. Score from recorded check-ins, applying the Scoring-Appendix §3 bonuses
+  //    server-side (base credit + per-trial bonus). See lib/engine/scoring.ts.
   const trials: ScoredTrial[] = (checkins ?? []).map((c) => {
     const baseCredit = Number(c.credit_value);
     if (!c.bonus_kind) return { baseCredit };
@@ -116,14 +159,8 @@ export async function POST(request: Request) {
   });
   const score = scoreSessionPercent(trials);
 
-  // 2. Resolve the current session's phase (+ its script, for the minimum
-  //    check-in rule below).
-  const { data: curSession, error: curErr } = await admin
-    .schema("curriculum_content")
-    .from("sessions")
-    .select("id, phase_number, phase_id, content_json")
-    .eq("id", instance.session_id)
-    .single();
+  // 2. The current session's phase (+ its script, for the minimum check-in rule).
+  const { data: curSession, error: curErr } = curRes;
   if (curErr) return NextResponse.json({ error: curErr.message }, { status: 500 });
   const currentPhaseNumber = curSession.phase_number;
 
@@ -148,12 +185,7 @@ export async function POST(request: Request) {
   }
 
   // 3. Assemble history for the decision.
-  const { data: history, error: histErr } = await admin
-    .from("session_instances")
-    .select("id, session_id, score_percent, completed_at, ran_simplified")
-    .eq("child_id", instance.child_id)
-    .not("completed_at", "is", null)
-    .order("completed_at", { ascending: true });
+  const { data: history, error: histErr } = histRes;
   if (histErr) return NextResponse.json({ error: histErr.message }, { status: 500 });
 
   const completed = history ?? [];
@@ -194,6 +226,8 @@ export async function POST(request: Request) {
   });
 
   // 4. Persist the outcome (service role — users cannot write these fields).
+  //    Must land BEFORE the age-bracket evaluation: its window and cooldown
+  //    count read completed sessions, which now include this one.
   const completedAt = new Date().toISOString();
   const { error: updErr } = await admin
     .from("session_instances")
@@ -201,7 +235,10 @@ export async function POST(request: Request) {
     .eq("id", sessionInstanceId);
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
 
-  // 5. On phase graduation, write the single audit trail row and move the child.
+  // 5. On phase graduation, write the single audit trail row and move the
+  //    child. Deliberately SEQUENTIAL: the phase_history row must exist before
+  //    children.current_phase_id moves — never a moved child without the audit
+  //    row.
   let advancedToPhaseNumber: number | null = null;
   let programmeComplete = false;
   if (decision.advancesPhase) {
@@ -255,23 +292,6 @@ export async function POST(request: Request) {
     } catch (e) {
       ageBracket = { evaluated: false, transitioned: false, error: e instanceof Error ? e.message : String(e) };
     }
-    // §13.5: persist the gate outcomes so the threshold-validation trigger
-    // ("revisit if none of the first 50 children clear all 3 gates") can be
-    // computed from data. Non-fatal — the outcome is already saved.
-    if (ageBracket && "evaluated" in ageBracket && ageBracket.evaluated) {
-      await admin
-        .from("session_instances")
-        .update({
-          age_gate_evaluation: {
-            gates: ageBracket.gates ?? null,
-            transitioned: ageBracket.transitioned,
-            blockedByCooldown: ageBracket.blockedByCooldown ?? false,
-            blockedByAgeFloor: ageBracket.blockedByAgeFloor ?? false,
-            windowSize: ageBracket.windowSize ?? 0,
-          },
-        })
-        .eq("id", sessionInstanceId);
-    }
   }
 
   // 7. Downward advisory (advisory-only — never moves the variant). Fires on a
@@ -282,6 +302,7 @@ export async function POST(request: Request) {
   //    6-attempt window, requiring ≥3 baseline attempts to call it
   //    "established"; margin = engine default (15 pts).
   let downwardAdvisory: { advise: boolean; reason: string } | null = null;
+  const instrumentation: Record<string, unknown> = {};
   const activityScores = completed
     .filter((r) => r.session_id === instance.session_id)
     .map((r) => Number(r.score_percent ?? 0));
@@ -298,11 +319,27 @@ export async function POST(request: Request) {
     downwardAdvisory = { advise: adv.advise, reason: adv.reason };
     // Persist every computed evaluation (advise true OR false) on the instance:
     // the SLP progression view reads the history, and §12 validation work needs
-    // the negatives too. Non-fatal if it fails — the outcome is already saved.
-    await admin
-      .from("session_instances")
-      .update({ downward_advisory: { advise: adv.advise, reason: adv.reason, baseline, recent } })
-      .eq("id", sessionInstanceId);
+    // the negatives too.
+    instrumentation.downward_advisory = { advise: adv.advise, reason: adv.reason, baseline, recent };
+  }
+
+  // §13.5: persist the gate outcomes so the threshold-validation trigger
+  // ("revisit if none of the first 50 children clear all 3 gates") can be
+  // computed from data.
+  if (ageBracket && "evaluated" in ageBracket && ageBracket.evaluated) {
+    instrumentation.age_gate_evaluation = {
+      gates: ageBracket.gates ?? null,
+      transitioned: ageBracket.transitioned,
+      blockedByCooldown: ageBracket.blockedByCooldown ?? false,
+      blockedByAgeFloor: ageBracket.blockedByAgeFloor ?? false,
+      windowSize: ageBracket.windowSize ?? 0,
+    };
+  }
+
+  // Both instrumentation writes target the same row — ONE update, not two.
+  // Non-fatal if it fails: the outcome is already saved.
+  if (Object.keys(instrumentation).length > 0) {
+    await admin.from("session_instances").update(instrumentation).eq("id", sessionInstanceId);
   }
 
   return NextResponse.json({
